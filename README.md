@@ -23,25 +23,25 @@ StudyMate AI solves both problems with an end-to-end, multi-modal pipeline:
 
 ```mermaid
 graph TD
-    A[Student / Course Materials] -->|PDF, PPTX, TXT, MP4 Video| B[FastAPI Ingestion Pipeline]
-    B -->|Text Extraction & Chunking| C[(SQLite Database)]
-    B -->|Gemini Files API Video Processing| C
-    C -->|Evidence Chunks & Timestamps| D[BM25 Lexical Retriever]
+    A["Student / Course Materials"] -->|"PDF, PPTX, TXT, MP4 Video"| B["FastAPI Ingestion Pipeline"]
+    B -->|"Text Extraction & Chunking"| C[("SQLite Database")]
+    B -->|"Gemini Files API Video Processing"| C
+    C -->|"Evidence Chunks & Timestamps"| D["BM25 Lexical Retriever"]
     
-    E[Student Interaction] -->|Student Prompt| F[Source-Grounded AI Tutor]
-    D -->|Top Context Chunks| F
-    F -->|Gemini Generation + Citations| E
+    E["Student Interaction"] -->|"Student Prompt"| F["Source-Grounded AI Tutor"]
+    D -->|"Top Context Chunks"| F
+    F -->|"Gemini Generation + Citations"| E
     
-    E -->|Quiz Configuration| G[Adaptive Smart Quiz Generator]
-    D -->|Grounded Evidence Chunks| G
-    G -->|Pydantic Validated JSON| H[Quiz Session & Questions]
+    E -->|"Quiz Configuration"| G["Adaptive Smart Quiz Generator"]
+    D -->|"Grounded Evidence Chunks"| G
+    G -->|"Pydantic Validated JSON"| H["Quiz Session & Questions"]
     
-    E -->|Submitted Answers| I[Deterministic & Rubric Scoring Engine]
-    H -->|Expected Answers & Rubrics| I
-    I -->|Graded Scores & Misconceptions| J[Bayesian Beta-Binomial Mastery Engine]
-    J -->|Beta(α, β) Updates| C
-    J -->|Competency Signals| K[Personalized Recommendations Engine]
-    K -->|Targeted Revision & Remediation| E
+    E -->|"Submitted Answers"| I["Deterministic & Rubric Scoring Engine"]
+    H -->|"Expected Answers & Rubrics"| I
+    I -->|"Graded Scores & Misconceptions"| J["Bayesian Beta-Binomial Mastery Engine"]
+    J -->|"Bayesian Mastery Updates"| C
+    J -->|"Competency Signals"| K["Personalized Recommendations Engine"]
+    K -->|"Targeted Revision & Remediation"| E
 ```
 
 ### Multimodal Video Ingestion Data Flow
