@@ -1,0 +1,15 @@
+"""Vercel ASGI application entrypoint shim for FastAPI backend service."""
+import os
+import sys
+
+# Ensure backend directory is in python search path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+try:
+    from .main import app
+except (ImportError, ValueError):
+    from main import app
+
+__all__ = ["app"]

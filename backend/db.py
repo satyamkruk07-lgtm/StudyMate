@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import json
+import shutil
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
@@ -12,17 +13,38 @@ def get_db_path() -> str:
     env_db = os.getenv("DB_PATH")
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if env_db:
-        if not os.path.isabs(env_db):
-            clean_name = os.path.basename(env_db)
-            candidate = os.path.join(repo_root, clean_name)
-            if os.path.exists(candidate):
-                return candidate
-        elif os.path.exists(env_db):
+        if os.path.isabs(env_db):
             return env_db
+        candidate = os.path.join(repo_root, os.path.basename(env_db))
+        if os.path.exists(candidate):
+            return candidate
+        return os.path.join(repo_root, env_db)
+
     root_candidate = os.path.join(repo_root, "studymate.db")
     if os.path.exists(root_candidate):
         return root_candidate
-    return os.path.join(os.path.dirname(__file__), "studymate.db")
+
+    backend_candidate = os.path.join(os.path.dirname(__file__), "studymate.db")
+    if os.path.exists(backend_candidate):
+        return backend_candidate
+
+    # In Vercel serverless runtime, working directory may be read-only
+    if os.environ.get("VERCEL"):
+        tmp_db = os.path.join("/tmp", "studymate.db")
+        if not os.path.exists(tmp_db):
+            if os.path.exists(root_candidate):
+                try:
+                    shutil.copy2(root_candidate, tmp_db)
+                except Exception:
+                    pass
+            elif os.path.exists(backend_candidate):
+                try:
+                    shutil.copy2(backend_candidate, tmp_db)
+                except Exception:
+                    pass
+        return tmp_db
+
+    return backend_candidate
 
 DB_PATH = get_db_path()
 
