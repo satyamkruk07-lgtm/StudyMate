@@ -1,0 +1,11 @@
+{
+  "tests_run": 7,
+  "tests_passed": 7,
+  "metrics": {
+    "citation_accuracy_pct": 100.0,
+    "unsupported_abstention_pct": 100.0,
+    "deterministic_scoring_precision_pct": 100.0,
+    "bayesian_update_correctness_pct": 100.0,
+    "duplicate_question_rate_pct": 0.0
+  }
+}

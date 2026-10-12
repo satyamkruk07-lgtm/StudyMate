@@ -1,0 +1,8 @@
+Foundations of Neural Networks and Optimization
+Course: IIT Mandi Multimodal AI Hackathon 2026 - Track D
+
+Section 1: Activation Functions
+The Rectified Linear Unit (ReLU) computes f(x) = max(0, x). By providing a constant gradient of 1 for positive activations, it avoids the vanishing gradient problem inherent in sigmoid and tanh activations during deep backpropagation.
+
+Section 2: Adam Optimization
+The Adam optimizer maintains exponentially decaying averages of past gradients (first moment m_t) and past squared gradients (second moment v_t). Bias correction terms are m_hat_t = m_t / (1 - beta_1^t) and v_hat_t = v_t / (1 - beta_2^t). Default hyperparameters: beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-8.
