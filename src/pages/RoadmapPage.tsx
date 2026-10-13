@@ -13,18 +13,19 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
-import { ROADMAP_NODES } from '../data/sampleRoadmap';
+import { getPersonalizedRoadmap } from '../data/sampleRoadmap';
 import { RoadmapNode } from '../types';
 
 export const RoadmapPage: React.FC = () => {
-  const { launchQuizWithConfig, setSelectedResourceForPreview, resources, setCurrentPage } = useStudy();
+  const { launchQuizWithConfig, setSelectedResourceForPreview, resources, setCurrentPage, profile } = useStudy();
 
-  const [selectedNode, setSelectedNode] = useState<RoadmapNode>(ROADMAP_NODES[4]); // default to Transformers
+  const currentRoadmap = getPersonalizedRoadmap(profile?.education_level);
+  const [selectedNode, setSelectedNode] = useState<RoadmapNode>(currentRoadmap[0]);
   const [filterCategory, setFilterCategory] = useState<string>('All');
 
-  const categories = ['All', ...Array.from(new Set(ROADMAP_NODES.map(n => n.category)))];
+  const categories = ['All', ...Array.from(new Set(currentRoadmap.map(n => n.category)))];
 
-  const filteredNodes = ROADMAP_NODES.filter(node => {
+  const filteredNodes = currentRoadmap.filter(node => {
     if (filterCategory === 'All') return true;
     return node.category === filterCategory;
   });
@@ -68,15 +69,19 @@ export const RoadmapPage: React.FC = () => {
       {/* Header */}
       <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              Curriculum Architecture
+              {profile?.education_level === 'school'
+                ? `School Curriculum • ${profile.grade_or_course || 'Class 10'}`
+                : profile?.education_level === 'college'
+                ? `College Degree • ${profile.grade_or_course || 'B.Tech/BCA'}`
+                : 'Self-Learner • AI Track'}
             </span>
-            <span className="text-xs text-slate-400">Track D: Multimodal AI</span>
+            <span className="text-xs text-slate-400">Track D: Adaptive Roadmap</span>
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight mt-1">Adaptive Learning Roadmap</h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Structured prerequisite graph showing foundations, sequence models, and multimodal alignment milestones.
+            Suggested prerequisite graph and study sequence for your profile. (Clearly distinguished from official institution syllabi).
           </p>
         </div>
 
@@ -104,7 +109,7 @@ export const RoadmapPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-3.5">
           {filteredNodes.map((node, index) => {
             const isSelected = selectedNode.id === node.id;
-            const prereqNodes = ROADMAP_NODES.filter(n => node.prerequisites.includes(n.id));
+            const prereqNodes = currentRoadmap.filter((n: RoadmapNode) => node.prerequisites.includes(n.id));
 
             return (
               <div
@@ -154,7 +159,7 @@ export const RoadmapPage: React.FC = () => {
                     {prereqNodes.length === 0 ? (
                       <span className="text-[11px] text-slate-400 italic">None (Foundation Milestone)</span>
                     ) : (
-                      prereqNodes.map(pr => (
+                      prereqNodes.map((pr: RoadmapNode) => (
                         <span
                           key={pr.id}
                           className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-sky-300 border border-slate-700/60"

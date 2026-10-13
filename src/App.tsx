@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { StudyProvider, useStudy } from './context/StudyContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopNavbar } from './components/layout/TopNavbar';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { OnboardingPage } from './pages/OnboardingPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { TutorPage } from './pages/TutorPage';
@@ -13,6 +17,20 @@ import { EvaluationPage } from './pages/EvaluationPage';
 const AppContent: React.FC = () => {
   const { currentPage } = useStudy();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Standalone full-page views
+  if (currentPage === 'home') {
+    return <HomePage />;
+  }
+  if (currentPage === 'login') {
+    return <LoginPage />;
+  }
+  if (currentPage === 'signup') {
+    return <SignupPage />;
+  }
+  if (currentPage === 'onboarding') {
+    return <OnboardingPage />;
+  }
 
   const renderActivePage = () => {
     switch (currentPage) {

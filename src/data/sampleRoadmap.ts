@@ -98,3 +98,159 @@ export const ROADMAP_NODES: RoadmapNode[] = [
     keyConcepts: ['RAG Triad', 'Faithfulness Evaluation', 'Source Citations', 'Adaptive Tutoring']
   }
 ];
+
+export const SCHOOL_ROADMAP_NODES: RoadmapNode[] = [
+  {
+    id: 'school-math-foundations',
+    title: 'Real Numbers & Polynomials',
+    description: 'Euclid’s division lemma, fundamental theorem of arithmetic, and zeroes of polynomials.',
+    category: 'Mathematics',
+    estimatedHours: 10,
+    prerequisites: [],
+    status: 'completed',
+    masteryPercentage: 92,
+    linkedResourceIds: [],
+    keyConcepts: ['Prime Factorization', 'Irrationality Proofs', 'Degree of Polynomials', 'Zeroes']
+  },
+  {
+    id: 'school-algebra',
+    title: 'Linear Equations & Quadratic Equations',
+    description: 'Graphical & algebraic solutions, quadratic formula, and discriminant nature of roots.',
+    category: 'Mathematics',
+    estimatedHours: 14,
+    prerequisites: ['school-math-foundations'],
+    status: 'completed',
+    masteryPercentage: 86,
+    linkedResourceIds: [],
+    keyConcepts: ['Elimination Method', 'Quadratic Formula', 'Discriminant', 'Word Problems']
+  },
+  {
+    id: 'school-physics-light',
+    title: 'Light: Reflection and Refraction',
+    description: 'Spherical mirrors, ray diagrams, mirror formula, Snell’s law, and lens power.',
+    category: 'Science (Physics)',
+    estimatedHours: 12,
+    prerequisites: [],
+    status: 'completed',
+    masteryPercentage: 80,
+    linkedResourceIds: [],
+    keyConcepts: ['Focal Length', 'Mirror Formula', 'Refractive Index', 'Lens Power']
+  },
+  {
+    id: 'school-chem-reactions',
+    title: 'Chemical Reactions and Equations',
+    description: 'Balancing equations, types of reactions, oxidation-reduction, and corrosion.',
+    category: 'Science (Chemistry)',
+    estimatedHours: 12,
+    prerequisites: [],
+    status: 'in-progress',
+    masteryPercentage: 74,
+    linkedResourceIds: [],
+    keyConcepts: ['Balancing Equations', 'Exothermic Reactions', 'Redox Reactions', 'Precipitation']
+  },
+  {
+    id: 'school-bio-lifeprocesses',
+    title: 'Life Processes & Cellular Nutrition',
+    description: 'Autotrophic photosynthesis, human digestive system, respiration, and circulatory transport.',
+    category: 'Science (Biology)',
+    estimatedHours: 16,
+    prerequisites: [],
+    status: 'in-progress',
+    masteryPercentage: 68,
+    linkedResourceIds: [],
+    keyConcepts: ['Photosynthesis Light Reactions', 'Xylem & Phloem', 'ATP Respiration', 'Double Circulation']
+  },
+  {
+    id: 'school-trig',
+    title: 'Introduction to Trigonometry',
+    description: 'Trigonometric ratios of acute angles, standard values (0° to 90°), and trigonometric identities.',
+    category: 'Mathematics',
+    estimatedHours: 15,
+    prerequisites: ['school-algebra'],
+    status: 'in-progress',
+    masteryPercentage: 55,
+    linkedResourceIds: [],
+    keyConcepts: ['sin/cos/tan definitions', 'Pythagorean Identities', 'Complementary Angles', 'Heights & Distances']
+  }
+];
+
+export const COLLEGE_ROADMAP_NODES: RoadmapNode[] = [
+  {
+    id: 'college-programming-dsa',
+    title: 'Data Structures & Algorithms',
+    description: 'Time complexity analysis, recursion, linked lists, trees, graphs, sorting, and dynamic programming.',
+    category: 'Computer Science',
+    estimatedHours: 25,
+    prerequisites: [],
+    status: 'completed',
+    masteryPercentage: 90,
+    linkedResourceIds: [],
+    keyConcepts: ['Asymptotic Complexity', 'Binary Search Trees', 'Graph Traversal (BFS/DFS)', 'Dynamic Programming']
+  },
+  {
+    id: 'college-dbms',
+    title: 'Database Management Systems & SQL',
+    description: 'Relational algebra, SQL queries, normalization (1NF to BCNF), ACID transactions, and indexing.',
+    category: 'Databases',
+    estimatedHours: 20,
+    prerequisites: ['college-programming-dsa'],
+    status: 'in-progress',
+    masteryPercentage: 78,
+    linkedResourceIds: [],
+    keyConcepts: ['Relational Schema', 'SQL Joins & Group By', 'BCNF Normalization', 'ACID Transactions & Concurrency']
+  },
+  {
+    id: 'college-os',
+    title: 'Operating Systems & Concurrency',
+    description: 'Process scheduling, virtual memory, paging, race conditions, semaphores, and deadlock handling.',
+    category: 'Systems',
+    estimatedHours: 22,
+    prerequisites: ['college-programming-dsa'],
+    status: 'completed',
+    masteryPercentage: 82,
+    linkedResourceIds: [],
+    keyConcepts: ['CPU Scheduling', 'Virtual Memory & Paging', 'Semaphores & Mutexes', 'Banker’s Algorithm']
+  },
+  {
+    id: 'college-networks',
+    title: 'Computer Networks & Internet Protocols',
+    description: 'OSI 7-layer model, TCP/IP handshake, congestion control, IP subnetting, DNS, and HTTP/HTTPS.',
+    category: 'Networking',
+    estimatedHours: 18,
+    prerequisites: ['college-os'],
+    status: 'in-progress',
+    masteryPercentage: 64,
+    linkedResourceIds: [],
+    keyConcepts: ['TCP 3-Way Handshake', 'CIDR Subnetting', 'Routing Algorithms', 'Transport Layer Security']
+  },
+  {
+    id: 'college-webtech',
+    title: 'Web Technologies & REST APIs',
+    description: 'Full-stack client-server architecture, asynchronous JavaScript/TypeScript, REST endpoints, and authentication.',
+    category: 'Software Engineering',
+    estimatedHours: 20,
+    prerequisites: ['college-programming-dsa'],
+    status: 'in-progress',
+    masteryPercentage: 72,
+    linkedResourceIds: [],
+    keyConcepts: ['RESTful Design', 'JWT Authentication', 'Asynchronous Promises', 'State Management']
+  },
+  {
+    id: 'college-aiml',
+    title: 'Machine Learning & Neural Modeling',
+    description: 'Supervised vs unsupervised learning, gradient descent, neural networks, and model evaluation.',
+    category: 'Artificial Intelligence',
+    estimatedHours: 24,
+    prerequisites: ['college-programming-dsa'],
+    status: 'in-progress',
+    masteryPercentage: 60,
+    linkedResourceIds: [],
+    keyConcepts: ['Gradient Descent', 'Backpropagation', 'Overfitting & Regularization', 'Evaluation Metrics (F1/AUC)']
+  }
+];
+
+export function getPersonalizedRoadmap(level?: string): RoadmapNode[] {
+  if (level === 'school') return SCHOOL_ROADMAP_NODES;
+  if (level === 'college') return COLLEGE_ROADMAP_NODES;
+  return ROADMAP_NODES;
+}

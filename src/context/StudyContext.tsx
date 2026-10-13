@@ -10,20 +10,47 @@ import {
   BackendQuiz,
   BackendAttemptResult,
   BackendTopicMastery,
-  BackendRecommendation
+  BackendRecommendation,
+  StudentProfile,
+  AuthUser,
+  EducationLevel
 } from '../types';
 import { INITIAL_RESOURCES } from '../data/sampleResources';
 import { INITIAL_MASTERY_DATA, INITIAL_QUIZ_ATTEMPTS } from '../data/sampleMastery';
 
-const DEFAULT_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000';
+const DEFAULT_API_BASE_URL = 
+  import.meta.env.VITE_API_BASE_URL !== undefined 
+    ? (import.meta.env.VITE_API_BASE_URL as string) 
+    : (import.meta.env.PROD ? '' : 'http://localhost:8000');
 
 interface StudyContextType {
   currentPage: PageId;
   setCurrentPage: (page: PageId) => void;
+
+  // Authentication & Session
+  user: AuthUser | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  guestLogin: (role?: EducationLevel) => void;
+
+  // Education Profile
+  profile: StudentProfile | null;
+  saveProfile: (newProfile: Omit<StudentProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  updateProfileSubjects: (subjects: string[]) => Promise<void>;
+  addCustomSubject: (subject: string) => Promise<void>;
+  removeSubject: (subject: string) => Promise<void>;
+  renameSubject: (oldName: string, newName: string) => Promise<void>;
+  activeSubject: string | null;
+  setActiveSubject: (subject: string | null) => void;
+
   resources: LearningResource[];
   isLoadingMaterials: boolean;
   refreshMaterials: () => Promise<void>;
-  uploadRealFile: (file: File, title?: string, topic?: string) => Promise<void>;
+  uploadRealFile: (file: File, title?: string, topic?: string, subject?: string) => Promise<void>;
+  updateResourceSubject: (resourceId: string, subject: string) => Promise<void>;
   addResource: (
     resource: Omit<LearningResource, 'id' | 'uploadDate' | 'status' | 'chunkCount' | 'chunks'>,
     simulatedContent?: string
@@ -84,11 +111,26 @@ interface StudyContextType {
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
 
+const getInitialPage = (): PageId => {
+  const path = window.location.pathname.toLowerCase();
+  if (path === '/login') return 'login';
+  if (path === '/signup') return 'signup';
+  if (path === '/onboarding') return 'onboarding';
+  if (path === '/dashboard') return 'dashboard';
+  if (path === '/library') return 'library';
+  if (path === '/tutor') return 'tutor';
+  if (path === '/quiz') return 'quiz';
+  if (path === '/mastery') return 'mastery';
+  if (path === '/roadmap') return 'roadmap';
+  if (path === '/evaluation') return 'evaluation';
+  return 'home';
+};
+
 const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-init-1',
     sender: 'tutor',
-    text: "Hello Satyam! I am StudyMate, your adaptive learning companion for Track D. I can explain complex machine learning concepts, walk you through mathematical proofs, or quiz your understanding—always grounded in your verified course library.\n\nWhat would you like to review today?",
+    text: "Hello! I am StudyMate, your adaptive learning companion for Track D. I can explain complex machine learning concepts, walk you through mathematical proofs, or quiz your understanding—always grounded in your verified course library.\n\nWhat would you like to review today?",
     timestamp: '10:00 AM',
     isGrounded: true,
     suggestedFollowUps: [
@@ -101,7 +143,49 @@ const INITIAL_CHAT_MESSAGES: ChatMessage[] = [
 ];
 
 export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentPage, setCurrentPage] = useState<PageId>('dashboard');
+  const [currentPage, setCurrentPageState] = useState<PageId>(getInitialPage);
+
+  const setCurrentPage = useCallback((page: PageId) => {
+    setCurrentPageState(page);
+    const targetPath = page === 'home' ? '/' : `/${page}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPageState(getInitialPage());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Authentication State
+  const [user, setUser] = useState<AuthUser | null>(() => {
+    try {
+      const saved = localStorage.getItem('studymate_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('studymate_token') || null;
+  });
+
+  // Education Profile State
+  const [profile, setProfile] = useState<StudentProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem('studymate_profile');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [activeSubject, setActiveSubject] = useState<string | null>(null);
 
   // Backend Integration Settings
   const [apiMode, setApiMode] = useState<'browser-mock' | 'fastapi-connected'>('fastapi-connected');
@@ -194,6 +278,7 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             fileName: m.fileName,
             fileSize: m.fileSize || '1.0 MB',
             topic: m.topic || 'General',
+            subject: m.subject || m.topic || 'General',
             uploadDate: m.uploadDate || '2026-10-12',
             status: m.status,
             chunkCount: m.chunkCount || (m.chunks ? m.chunks.length : 0),
@@ -252,18 +337,278 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [apiEndpoint, apiMode]);
 
-  // Check backend availability on mount
+  // Check backend availability on mount and restore user session
   useEffect(() => {
     testBackendConnection().then(isOnline => {
       if (isOnline) {
         setApiMode('fastapi-connected');
         refreshMaterials();
         refreshMasteryAndRecs();
+
+        // Verify active token with backend
+        if (token) {
+          fetch(`${apiEndpoint}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+            .then(res => {
+              if (res.ok) return res.json();
+              throw new Error('Session invalid');
+            })
+            .then(data => {
+              if (data.user) {
+                setUser(data.user);
+                localStorage.setItem('studymate_user', JSON.stringify(data.user));
+              }
+              if (data.profile) {
+                setProfile(data.profile);
+                localStorage.setItem('studymate_profile', JSON.stringify(data.profile));
+              }
+            })
+            .catch(() => {
+              // Token expired or invalid
+              setToken(null);
+              localStorage.removeItem('studymate_token');
+            });
+        }
       } else {
         setApiMode('browser-mock');
       }
     });
-  }, [testBackendConnection, refreshMaterials, refreshMasteryAndRecs]);
+  }, [testBackendConnection, refreshMaterials, refreshMasteryAndRecs, apiEndpoint, token]);
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    if (apiMode === 'fastapi-connected') {
+      try {
+        const res = await fetch(`${apiEndpoint}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: 'Login failed' }));
+          return { success: false, error: err.detail || 'Invalid email or password.' };
+        }
+        const data = await res.json();
+        setToken(data.token);
+        setUser(data.user);
+        localStorage.setItem('studymate_token', data.token);
+        localStorage.setItem('studymate_user', JSON.stringify(data.user));
+        if (data.profile) {
+          setProfile(data.profile);
+          localStorage.setItem('studymate_profile', JSON.stringify(data.profile));
+          setCurrentPage('dashboard');
+        } else {
+          setProfile(null);
+          localStorage.removeItem('studymate_profile');
+          setCurrentPage('onboarding');
+        }
+        return { success: true };
+      } catch (e: any) {
+        return { success: false, error: e.message || 'Connection error with FastAPI backend' };
+      }
+    } else {
+      const mockUser: AuthUser = { id: 'usr-mock-1', email, name: email.split('@')[0] };
+      setUser(mockUser);
+      setToken('mock-token-session');
+      localStorage.setItem('studymate_user', JSON.stringify(mockUser));
+      localStorage.setItem('studymate_token', 'mock-token-session');
+      if (profile && profile.is_profile_completed) {
+        setCurrentPage('dashboard');
+      } else {
+        setCurrentPage('onboarding');
+      }
+      return { success: true };
+    }
+  };
+
+  const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    if (apiMode === 'fastapi-connected') {
+      try {
+        const res = await fetch(`${apiEndpoint}/api/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: 'Registration failed' }));
+          return { success: false, error: err.detail || 'Registration failed' };
+        }
+        const data = await res.json();
+        setToken(data.token);
+        setUser(data.user);
+        setProfile(null);
+        localStorage.setItem('studymate_token', data.token);
+        localStorage.setItem('studymate_user', JSON.stringify(data.user));
+        localStorage.removeItem('studymate_profile');
+        setCurrentPage('onboarding');
+        return { success: true };
+      } catch (e: any) {
+        return { success: false, error: e.message || 'Network error' };
+      }
+    } else {
+      const mockUser: AuthUser = { id: 'usr-mock-1', email, name };
+      setUser(mockUser);
+      setToken('mock-token-session');
+      setProfile(null);
+      localStorage.setItem('studymate_user', JSON.stringify(mockUser));
+      localStorage.setItem('studymate_token', 'mock-token-session');
+      localStorage.removeItem('studymate_profile');
+      setCurrentPage('onboarding');
+      return { success: true };
+    }
+  };
+
+  const logout = async () => {
+    if (apiMode === 'fastapi-connected' && token) {
+      try {
+        await fetch(`${apiEndpoint}/api/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (e) {
+        console.warn('Logout request failed:', e);
+      }
+    }
+    setUser(null);
+    setToken(null);
+    setProfile(null);
+    localStorage.removeItem('studymate_user');
+    localStorage.removeItem('studymate_token');
+    localStorage.removeItem('studymate_profile');
+    setCurrentPage('home');
+  };
+
+  const guestLogin = (role: EducationLevel = 'college') => {
+    const guestUser: AuthUser = {
+      id: `guest-${role}`,
+      email: `guest.${role}@studymate.ai`,
+      name: role === 'school' ? 'Aarav Sharma' : role === 'self' ? 'Priya Verma' : 'Satyam Kumar'
+    };
+    const guestProfile: StudentProfile = {
+      education_level: role,
+      grade_or_course: role === 'school' ? 'Class 10' : role === 'self' ? 'Full-Stack & AI Practitioner' : 'B.Tech Computer Science',
+      board_or_specialization: role === 'school' ? 'CBSE' : role === 'self' ? 'Deep Learning & Systems' : 'Artificial Intelligence',
+      academic_year: role === 'college' ? '3rd Year' : undefined,
+      semester: role === 'college' ? 'Semester 6' : undefined,
+      preferred_language: 'English',
+      selected_subjects: role === 'school'
+        ? ['Mathematics', 'Science', 'Social Science', 'English']
+        : role === 'self'
+        ? ['Deep Learning Foundations', 'Transformer Models', 'System Architecture']
+        : ['Deep Learning', 'Operating Systems', 'Database Systems', 'Algorithms'],
+      is_profile_completed: true
+    };
+    setUser(guestUser);
+    setToken(`guest-token-${Date.now()}`);
+    setProfile(guestProfile);
+    localStorage.setItem('studymate_user', JSON.stringify(guestUser));
+    localStorage.setItem('studymate_token', `guest-token-${Date.now()}`);
+    localStorage.setItem('studymate_profile', JSON.stringify(guestProfile));
+    setCurrentPage('dashboard');
+  };
+
+  const saveProfile = async (newProfile: Omit<StudentProfile, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    const profileToSave: StudentProfile = {
+      ...newProfile,
+      is_profile_completed: true
+    };
+
+    if (apiMode === 'fastapi-connected' && token) {
+      try {
+        const res = await fetch(`${apiEndpoint}/api/profile`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(profileToSave)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.profile) {
+            setProfile(data.profile);
+            localStorage.setItem('studymate_profile', JSON.stringify(data.profile));
+            setCurrentPage('dashboard');
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not save profile to backend, saving locally:', e);
+      }
+    }
+
+    setProfile(profileToSave);
+    localStorage.setItem('studymate_profile', JSON.stringify(profileToSave));
+    setCurrentPage('dashboard');
+  };
+
+  const updateProfileSubjects = async (subjects: string[]) => {
+    if (!profile) return;
+    const updated: StudentProfile = {
+      ...profile,
+      selected_subjects: subjects
+    };
+    setProfile(updated);
+    localStorage.setItem('studymate_profile', JSON.stringify(updated));
+
+    if (apiMode === 'fastapi-connected' && token) {
+      try {
+        await fetch(`${apiEndpoint}/api/profile`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ selected_subjects: subjects })
+        });
+      } catch (e) {
+        console.warn('Backend patch profile error:', e);
+      }
+    }
+  };
+
+  const addCustomSubject = async (newSubject: string) => {
+    const clean = newSubject.trim();
+    if (!clean || !profile) return;
+    if (profile.selected_subjects.includes(clean)) return;
+    const updatedSubjects = [...profile.selected_subjects, clean];
+    await updateProfileSubjects(updatedSubjects);
+  };
+
+  const removeSubject = async (subjectToRemove: string) => {
+    if (!profile) return;
+    const updatedSubjects = profile.selected_subjects.filter(s => s !== subjectToRemove);
+    if (activeSubject === subjectToRemove) {
+      setActiveSubject(updatedSubjects.length > 0 ? updatedSubjects[0] : null);
+    }
+    await updateProfileSubjects(updatedSubjects);
+  };
+
+  const renameSubject = async (oldName: string, newName: string) => {
+    const clean = newName.trim();
+    if (!profile || !clean) return;
+    const updatedSubjects = profile.selected_subjects.map(s => (s === oldName ? clean : s));
+    if (activeSubject === oldName) {
+      setActiveSubject(clean);
+    }
+    await updateProfileSubjects(updatedSubjects);
+  };
+
+  const updateResourceSubject = async (resourceId: string, subject: string) => {
+    const clean = subject.trim();
+    setResources(prev => prev.map(r => (r.id === resourceId ? { ...r, subject: clean, topic: clean } : r)));
+    if (apiMode === 'fastapi-connected') {
+      try {
+        await fetch(`${apiEndpoint}/api/materials/${resourceId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject: clean, topic: clean })
+        });
+      } catch (e) {
+        console.warn('Backend update resource subject failed:', e);
+      }
+    }
+  };
 
   // Persist to LocalStorage
   useEffect(() => {
@@ -299,12 +644,14 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [masteryData]);
 
   // Real file upload to FastAPI backend
-  const uploadRealFile = async (file: File, title?: string, topic?: string) => {
+  const uploadRealFile = async (file: File, title?: string, topic?: string, subject?: string) => {
+    const assignedSubject = subject || activeSubject || topic || 'General';
     if (apiMode === 'fastapi-connected') {
       const formData = new FormData();
       formData.append('file', file);
       if (title) formData.append('title', title);
       if (topic) formData.append('topic', topic);
+      if (assignedSubject) formData.append('subject', assignedSubject);
 
       const res = await fetch(`${apiEndpoint}/api/materials/upload`, {
         method: 'POST',
@@ -325,6 +672,7 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           fileName: resData.document.fileName,
           fileSize: resData.document.fileSize,
           topic: resData.document.topic,
+          subject: resData.document.subject || assignedSubject,
           uploadDate: resData.document.uploadDate,
           status: resData.document.status,
           chunkCount: resData.document.chunkCount,
@@ -341,6 +689,7 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fileType: (file.name.endsWith('.pdf') ? 'pdf' : file.name.endsWith('.pptx') ? 'pptx' : 'txt'),
         fileSize: `${Math.round(file.size / 1024)} KB`,
         topic: topic || 'General',
+        subject: assignedSubject,
         summary: `Uploaded document ${file.name}`
       }, text);
     }
@@ -428,8 +777,14 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }): Promise<BackendQuiz> => {
     const res = await fetch(`${apiEndpoint}/api/quizzes/generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        ...params,
+        subject: activeSubject || undefined
+      })
     });
 
     if (!res.ok) {
@@ -557,10 +912,27 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (apiMode === 'fastapi-connected') {
       try {
+        const recentHistory = chatMessages.slice(-4).map(m => ({
+          role: m.sender === 'student' ? 'user' : 'assistant',
+          content: m.text
+        }));
+
         const res = await fetch(`${apiEndpoint}/api/ask`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: studentPrompt })
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            question: studentPrompt,
+            subject: activeSubject || undefined,
+            education_level: profile?.education_level,
+            grade_or_course: profile?.grade_or_course,
+            board_or_specialization: profile?.board_or_specialization,
+            preferred_language: profile?.preferred_language || 'English',
+            explanation_style: profile?.explanation_style || 'step-by-step',
+            conversation_history: recentHistory
+          })
         });
 
         if (res.status === 503) {
@@ -572,6 +944,7 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             text: `⚠️ **Server AI Provider Configuration Required**\n\n${errData.detail || 'GEMINI_API_KEY is not configured on the backend server.'}\n\n**To resolve:**\n1. Open \`backend/.env\`\n2. Set \`GEMINI_API_KEY=your_actual_gemini_api_key\`\n3. Restart or reload the FastAPI backend.`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             isGrounded: false,
+            mode: 'strict_insufficient',
             unverifiedReason: 'Backend GEMINI_API_KEY missing. No fabricated AI response generated.'
           };
           setChatMessages(prev => [...prev, warningMsg]);
@@ -587,7 +960,8 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             sender: 'tutor',
             text: `⚠️ **AI Model Error**: ${errData.detail}`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isGrounded: false
+            isGrounded: false,
+            mode: 'strict_insufficient'
           };
           setChatMessages(prev => [...prev, errorMsg]);
           setIsChatThinking(false);
@@ -610,12 +984,13 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             sender: 'tutor',
             text: data.answer,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isGrounded: data.is_grounded,
+            isGrounded: Boolean(data.is_grounded),
+            mode: data.mode || (data.is_grounded ? 'source_grounded' : 'general_ai'),
             unverifiedReason: data.insufficient_evidence ? 'No matching evidence found in active library materials.' : undefined,
             citations: citations,
             suggestedFollowUps: data.suggested_follow_ups || [
-              'What topics are covered in my uploaded documents?',
-              'Explain with an example',
+              'Can you provide another step-by-step example on this?',
+              'How does this apply to my coursework?',
               'Take a quiz on this topic'
             ]
           };
@@ -629,44 +1004,119 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
 
-    // In-Browser Engine Fallback
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // In-Browser Engine Fallback (Dynamic pedagogical variety)
+    await new Promise(resolve => setTimeout(resolve, 600));
     const promptLower = studentPrompt.toLowerCase();
+    const isSchool = profile?.education_level === 'school';
+    const isCollege = profile?.education_level === 'college';
+    const userStage = profile?.grade_or_course || (isSchool ? 'Class 10' : 'BCA / B.Tech');
 
-    const outOfDomainKeywords = ['peru', 'capital of', 'weather', 'movie', 'crypto', 'football', 'president', 'quantum physics', 'stock market'];
-    const isOutOfDomain = outOfDomainKeywords.some(keyword => promptLower.includes(keyword));
+    // 1. Python Variables
+    if (promptLower.includes('python') && (promptLower.includes('variable') || promptLower.includes('syntax'))) {
+      const responseText = isSchool
+        ? `In Python, a **variable** is like a labeled storage box where you store data values.\n\n### Example:\n\`\`\`python\n# Storing school information\nstudent_name = "Aryan"\nage = 15\nmath_score = 92.5\n\nprint("Student:", student_name)\nprint("Score:", math_score)\n\`\`\`\n\n**Key Points:**\n1. You do not need to declare types manually in Python (it uses dynamic typing).\n2. Variable names must start with a letter or an underscore, not a number.`
+        : `In Python, **variables** are symbolic references bound to memory objects rather than statically typed memory slots.\n\n### Implementation Example:\n\`\`\`python\n# Dynamic type binding in Python\nx = 42                # Binds reference 'x' to int object 42\nx = "StudyMate AI"    # Rebinds 'x' to str object without type error\n\n# Multi-assignment and unpacking\nuser_id, status, is_active = "usr_101", "enrolled", True\n\n# Inspecting memory address and type\nprint(f"Address: {id(x)}, Type: {type(x)}")\n\`\`\`\n\n**Under the Hood:**\nPython manages variable lifetime through reference counting and automatic garbage collection. Everything in Python is a first-class object.`;
 
-    if (isOutOfDomain) {
-      const unverifiedMsg: ChatMessage = {
+      const tutorMsg: ChatMessage = {
         id: `msg-tutor-${Date.now()}`,
         sender: 'tutor',
-        text: `⚠️ **Verification Notice: Grounding Not Available**\n\nThe question you asked falls outside the scope of your uploaded course materials.\n\nStudyMate strictly operates under **Hallucination Prevention Guardrails** for Track D: we do not synthesize speculative answers or fabricate citations for topics not indexed in your active library.\n\nTo explore this topic, please upload relevant research papers, notes, or lecture transcripts to your **Learning Library**.`,
+        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage}*`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isGrounded: false,
-        unverifiedReason: 'Query keywords were not found within any indexed document chunks with sufficient similarity (threshold: 0.65).',
+        mode: 'general_ai',
         suggestedFollowUps: [
-          'What topics are currently in my library?',
-          'Why do we divide by √d_k in scaled dot-product attention?',
-          'Explain the Adam optimizer bias correction.'
+          'What are mutable vs immutable types in Python?',
+          'Give me another example with lists and dictionaries',
+          'Practice Python quiz questions'
         ]
       };
-      setChatMessages(prev => [...prev, unverifiedMsg]);
+      setChatMessages(prev => [...prev, tutorMsg]);
       setIsChatThinking(false);
       return;
     }
 
-    if (promptLower.includes('relu') || promptLower.includes('activation')) {
+    // 2. DBMS Normalization
+    if (promptLower.includes('dbms') || promptLower.includes('normalization') || promptLower.includes('normal form')) {
+      const responseText = `### Database Normalization Explained (${userStage})\n\n**Normalization** is the systematic database design technique of organizing tables to eliminate data redundancy and prevent insert, update, and delete anomalies.\n\n#### The Main Normal Forms:\n\n1. **First Normal Form (1NF):**\n   - Each column must contain atomic (indivisible) values.\n   - No repeating groups or arrays in columns.\n\n2. **Second Normal Form (2NF):**\n   - Must already be in 1NF.\n   - Eliminates **partial functional dependencies** (every non-key attribute must depend fully on the primary key, especially in composite keys).\n\n3. **Third Normal Form (3NF):**\n   - Must already be in 2NF.\n   - Eliminates **transitive functional dependencies** ($X \\rightarrow Y$ and $Y \\rightarrow Z$). Non-key attributes must directly depend only on the primary key.\n\n\`\`\`sql\n-- Example: Normalizing Student Enrollment\n-- Unnormalized: (student_id, student_name, course_id, course_name, instructor)\n-- 3NF Schema:\nCREATE TABLE Students (student_id INT PRIMARY KEY, name VARCHAR(100));\nCREATE TABLE Courses (course_id INT PRIMARY KEY, title VARCHAR(100), instructor VARCHAR(100));\nCREATE TABLE Enrollments (student_id INT, course_id INT, PRIMARY KEY (student_id, course_id));\n\`\`\``;
+
+      const tutorMsg: ChatMessage = {
+        id: `msg-tutor-${Date.now()}`,
+        sender: 'tutor',
+        text: responseText + `\n\n💡 *General Knowledge Explanation • Adapted for ${userStage} DBMS Curriculum*`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isGrounded: false,
+        mode: 'general_ai',
+        suggestedFollowUps: [
+          'What is Boyce-Codd Normal Form (BCNF)?',
+          'Show an example of a transitive dependency violation',
+          'Take a DBMS quiz'
+        ]
+      };
+      setChatMessages(prev => [...prev, tutorMsg]);
+      setIsChatThinking(false);
+      return;
+    }
+
+    // 3. Photosynthesis (with Hindi / Hinglish handling)
+    if (promptLower.includes('photosynthesis') || promptLower.includes('प्रकाश संश्लेषण')) {
+      const isHindi = promptLower.includes('hindi') || promptLower.includes('हिंदी') || promptLower.includes('hinglish');
+      const responseText = isHindi
+        ? `### प्रकाश संश्लेषण (Photosynthesis) — सरल व्याख्या\n\n**प्रकाश संश्लेषण** वह प्रक्रिया है जिसके द्वारा हरे पौधे सूर्य के प्रकाश (Sunlight) की ऊर्जा का उपयोग करके अपने भोजन (Glucose) का निर्माण करते हैं।\n\n#### रासायनिक समीकरण (Chemical Formula):\n$$6CO_2 + 6H_2O \\xrightarrow{\\text{सूर्य का प्रकाश / क्लोरोफिल}} C_6H_{12}O_6 + 6O_2$$\n\n#### मुख्य घटक (Essential Components):\n1. **क्लोरोफिल (Chlorophyll):** पत्तियों में मौजूद हरा वर्णक जो प्रकाश ऊर्जा को अवशोषित करता है।\n2. **सूर्य का प्रकाश (Sunlight):** रासायनिक प्रतिक्रिया के लिए ऊर्जा प्रदान करता है।\n3. **जल (Water):** जड़ों द्वारा मिट्टी से अवशोषित किया जाता है।\n4. **कार्बन डाइऑक्साइड ($CO_2$):** वायुमंडल से स्टोमेटा (Stomata) के माध्यम से लिया जाता है।\n\n**महत्व:** यह प्रक्रिया पृथ्वी पर जीवन के लिए ऑक्सीजन ($O_2$) और भोजन का प्राथमिक स्रोत है।`
+        : `### Photosynthesis Explained (${userStage})\n\n**Photosynthesis** is the fundamental biochemical process by which photoautotrophic organisms (green plants, algae) synthesize chemical energy (glucose) from inorganic substrates using solar radiation.\n\n#### Balanced Chemical Equation:\n$$6CO_2 + 6H_2O \\xrightarrow{\\text{Sunlight, Chlorophyll}} C_6H_{12}O_6 + 6O_2$$\n\n#### The Two Primary Phases:\n1. **Light-Dependent Reactions (Thylakoids):** Photolysis of water releases oxygen and synthesizes ATP and NADPH.\n2. **Calvin Cycle / Light-Independent Reactions (Stroma):** Carbon fixation incorporates $CO_2$ into glucose using ATP/NADPH energy.`;
+
+      const tutorMsg: ChatMessage = {
+        id: `msg-tutor-${Date.now()}`,
+        sender: 'tutor',
+        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage} Science Curriculum*`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isGrounded: false,
+        mode: 'general_ai',
+        suggestedFollowUps: [
+          'What is the role of stomata in photosynthesis?',
+          'How does the Calvin Cycle differ from the light reactions?',
+          'Take a Science quiz'
+        ]
+      };
+      setChatMessages(prev => [...prev, tutorMsg]);
+      setIsChatThinking(false);
+      return;
+    }
+
+    // 4. Compare AI and Machine Learning
+    if ((promptLower.includes('compare') || promptLower.includes('difference')) && promptLower.includes('ai') && (promptLower.includes('machine learning') || promptLower.includes('ml'))) {
+      const responseText = `### Comparison: Artificial Intelligence (AI) vs Machine Learning (ML)\n\n| Feature | Artificial Intelligence (AI) | Machine Learning (ML) |\n| :--- | :--- | :--- |\n| **Definition** | The broad umbrella discipline aiming to simulate human intelligence and problem-solving in machines. | A specific subset of AI that focuses on learning patterns from data without being explicitly programmed. |\n| **Scope** | Broad concept including robotics, expert systems, symbolic reasoning, and ML. | Focused domain inside AI relying on statistical algorithms and empirical optimization. |\n| **Core Goal** | Maximize probability of success in cognitive or physical tasks. | Minimize error/loss metrics on predictive tasks. |\n| **Methods** | Rule-based engines, search heuristics, genetic algorithms, neural networks. | Regression, Decision Trees, SVMs, Bayesian Models, Deep Learning. |\n\n**Analogy:** If AI is the concept of a self-driving vehicle, Machine Learning is the computer vision model that detects pedestrians from camera frames.`;
+
+      const tutorMsg: ChatMessage = {
+        id: `msg-tutor-${Date.now()}`,
+        sender: 'tutor',
+        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage}*`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isGrounded: false,
+        mode: 'general_ai',
+        suggestedFollowUps: [
+          'Where does Deep Learning fit in this taxonomy?',
+          'What is the difference between supervised and unsupervised learning?',
+          'Generate a quiz on AI Foundations'
+        ]
+      };
+      setChatMessages(prev => [...prev, tutorMsg]);
+      setIsChatThinking(false);
+      return;
+    }
+
+    // 5. Document-Grounded Queries (ReLU, Activation, Transformers, Attention, Pooling)
+    if (promptLower.includes('relu') || promptLower.includes('activation') || promptLower.includes('gradient')) {
       const res = resources.find(r => r.id.includes('5a2c') || r.id === 'res-1') || resources[0];
       const citation: CitationReference = {
-        resourceId: res.id,
-        resourceTitle: res.title,
-        fileType: res.fileType,
+        resourceId: res ? res.id : 'res-1',
+        resourceTitle: res ? res.title : 'Neural Networks Notes (txt)',
+        fileType: res ? res.fileType : 'txt',
         location: 'Lines 4-6',
         snippet: 'The Rectified Linear Unit (ReLU) computes f(x) = max(0, x). By providing a constant gradient of 1 for positive activations, it avoids the vanishing gradient problem inherent in sigmoid and tanh activations during deep backpropagation.',
         confidenceScore: 0.99
       };
 
-      const responseText = `The Rectified Linear Unit (**ReLU**) is defined by the piecewise linear function:\n$$f(x) = \\max(0, x)$$\n\n**Derivative Formulation:**\n$$f'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0 & \\text{if } x < 0 \\end{cases}$$\n\n**Significance:**\nBy keeping a constant gradient of 1 for all positive activations, ReLU prevents gradients from shrinking exponentially during deep backpropagation, thereby directly resolving the **vanishing gradient problem** that plagues saturated sigmoidal activations.`;
+      const responseText = `The Rectified Linear Unit (**ReLU**) is defined by the piecewise linear function:\n$$f(x) = \\max(0, x)$$\n\n**Derivative Formulation:**\n$$f'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0 & \\text{if } x < 0 \\end{cases}$$\n\n**Significance in Deep Learning:**\nBy maintaining a constant gradient of $1$ for all positive inputs, ReLU prevents gradients from decaying exponentially during deep backpropagation, directly resolving the **vanishing gradient problem** that hinders saturated sigmoidal activations.`;
 
       const tutorMsg: ChatMessage = {
         id: `msg-tutor-${Date.now()}`,
@@ -674,42 +1124,35 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         text: responseText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isGrounded: true,
+        mode: 'source_grounded',
         citations: [citation],
         topicTag: 'Neural Networks',
         suggestedFollowUps: [
           'What is the Dying ReLU problem and how does Leaky ReLU help?',
           'How does Batch Normalization interact with ReLU?',
-          'Take a quiz on Activation Functions.'
+          'Take a quiz on Activation Functions'
         ]
       };
       setChatMessages(prev => [...prev, tutorMsg]);
-    } else {
-      const defaultCitation: CitationReference = {
-        resourceId: resources[0]?.id || 'res-1',
-        resourceTitle: resources[0]?.title || 'Foundations of Deep Learning (pdf)',
-        fileType: resources[0]?.fileType || 'pdf',
-        location: 'Page 12, §2.4',
-        snippet: 'Deep learning systems use hierarchical representations where lower layers capture primitive signals and higher layers compose contextual concepts.',
-        confidenceScore: 0.88
-      };
-
-      const tutorMsg: ChatMessage = {
-        id: `msg-tutor-${Date.now()}`,
-        sender: 'tutor',
-        text: `Here is a grounded synthesis from your learning materials:\n\nIn deep hierarchical networks, each sequential layer computes a non-linear mapping $h^{(l)} = \\sigma(W^{(l)} h^{(l-1)} + b^{(l)})$. Ensuring gradient stability requires balanced activation choices (such as ReLU/GELU) and normalization layers.\n\n*Note: To verify against specific papers or slides, reference topics like Transformers, Adam, or Activation Functions.*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: true,
-        citations: [defaultCitation],
-        topicTag: 'Neural Networks',
-        suggestedFollowUps: [
-          'Explain vanishing gradients in deep backpropagation.',
-          'How does Batch Normalization stabilize training?',
-          'Switch to Smart Quiz mode.'
-        ]
-      };
-      setChatMessages(prev => [...prev, tutorMsg]);
+      setIsChatThinking(false);
+      return;
     }
 
+    // 6. Generic Question Dynamic Synthesis
+    const tutorMsg: ChatMessage = {
+      id: `msg-tutor-${Date.now()}`,
+      sender: 'tutor',
+      text: `### Conceptual Explanation: ${studentPrompt}\n\nHere is a structured explanation prepared for **${userStage}**:\n\n1. **Core Concept:** Understanding the foundational definitions and mechanics of ${activeSubject || 'this domain'}.\n2. **Practical Application:** In practical contexts, mastering this principle allows you to solve curriculum problems and build reliable systems.\n3. **Key Takeaway:** Consistent practice and testing your comprehension accelerates retention.\n\n💡 *General Knowledge Explanation • Tailored for ${userStage} • To enable source-grounded answers with citations, upload related lecture slides to your Learning Library.*`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isGrounded: false,
+      mode: 'general_ai',
+      suggestedFollowUps: [
+        'Can you provide a step-by-step example?',
+        'How does this relate to exam questions?',
+        'Test my understanding with a smart quiz'
+      ]
+    };
+    setChatMessages(prev => [...prev, tutorMsg]);
     setIsChatThinking(false);
   };
 
@@ -718,10 +1161,26 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         currentPage,
         setCurrentPage,
+        user,
+        token,
+        isAuthenticated: !!user,
+        login,
+        signup,
+        logout,
+        guestLogin,
+        profile,
+        saveProfile,
+        updateProfileSubjects,
+        addCustomSubject,
+        removeSubject,
+        renameSubject,
+        activeSubject,
+        setActiveSubject,
         resources,
         isLoadingMaterials,
         refreshMaterials,
         uploadRealFile,
+        updateResourceSubject,
         addResource,
         deleteResource,
         selectedResourceForPreview,

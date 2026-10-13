@@ -1,7 +1,11 @@
 import math
 import re
-from typing import List, Dict, Any, Tuple
-from .db import get_all_searchable_chunks
+from typing import List, Dict, Any, Tuple, Optional
+
+try:
+    from .db import get_all_searchable_chunks
+except (ImportError, ValueError):
+    from db import get_all_searchable_chunks
 
 def tokenize(text: str) -> List[str]:
     """Tokenize text into lowercase alphanumeric tokens."""
@@ -16,7 +20,7 @@ class BM25Retriever:
         self.k1 = k1
         self.b = b
 
-    def retrieve(self, query: str, top_k: int = 4, score_threshold: float = 1.2) -> Tuple[List[Dict[str, Any]], bool]:
+    def retrieve(self, query: str, top_k: int = 4, score_threshold: float = 1.2, subject: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
         chunks = get_all_searchable_chunks()
         if not chunks:
             return [], False
@@ -66,6 +70,16 @@ class BM25Retriever:
             if clean_q and clean_q in c["title"].lower():
                 score += 3.0
 
+            # Bonus when chunk aligns with user's selected educational subject
+            if subject and subject.strip():
+                sub_clean = subject.strip().lower()
+                chunk_topic = c.get("topic", "").lower()
+                chunk_title = c.get("title", "").lower()
+                if sub_clean in chunk_topic or chunk_topic in sub_clean:
+                    score += 3.5
+                elif sub_clean in chunk_title:
+                    score += 2.0
+
             scores.append((score, c))
 
         # Sort descending by score
@@ -87,5 +101,6 @@ class BM25Retriever:
 
 retriever = BM25Retriever()
 
-def search_relevant_chunks(query: str, top_k: int = 4, threshold: float = 1.0) -> Tuple[List[Dict[str, Any]], bool]:
-    return retriever.retrieve(query, top_k=top_k, score_threshold=threshold)
+def search_relevant_chunks(query: str, top_k: int = 4, threshold: float = 1.0, subject: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
+    return retriever.retrieve(query, top_k=top_k, score_threshold=threshold, subject=subject)
+

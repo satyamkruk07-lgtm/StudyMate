@@ -1,4 +1,8 @@
 export type PageId =
+  | 'home'
+  | 'login'
+  | 'signup'
+  | 'onboarding'
   | 'dashboard'
   | 'library'
   | 'tutor'
@@ -6,6 +10,34 @@ export type PageId =
   | 'mastery'
   | 'roadmap'
   | 'evaluation';
+
+export type EducationLevel = 'school' | 'college' | 'self';
+
+export interface StudentProfile {
+  id?: string;
+  user_id?: string;
+  education_level: EducationLevel;
+  grade_or_course: string;
+  board_or_specialization?: string;
+  academic_year?: string;
+  semester?: string;
+  state?: string;
+  preferred_language: string;
+  selected_subjects: string[];
+  learning_goals?: string;
+  difficulty_level?: 'beginner' | 'intermediate' | 'advanced' | string;
+  explanation_style?: 'step-by-step' | 'conceptual' | 'code-practical' | 'exam-focused' | string;
+  is_profile_completed: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  created_at?: string;
+}
 
 export type FileType = 'pdf' | 'pptx' | 'txt' | 'transcript' | 'mp4' | 'webm' | 'video';
 
@@ -26,6 +58,7 @@ export interface LearningResource {
   fileName: string;
   fileSize: string;
   topic: string;
+  subject?: string;
   uploadDate: string;
   status: ProcessingStatus;
   chunkCount: number;
@@ -49,6 +82,7 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   isGrounded: boolean; // True if answer is verified from learning library
+  mode?: 'source_grounded' | 'general_ai' | 'strict_insufficient';
   citations?: CitationReference[];
   suggestedFollowUps?: string[];
   unverifiedReason?: string; // Reason if question cannot be answered from library

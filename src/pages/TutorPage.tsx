@@ -30,7 +30,10 @@ export const TutorPage: React.FC = () => {
     clearChat,
     resources,
     setSelectedResourceForPreview,
-    setCurrentPage
+    setCurrentPage,
+    activeSubject,
+    setActiveSubject,
+    profile
   } = useStudy();
 
   const [inputPrompt, setInputPrompt] = useState('');
@@ -74,32 +77,76 @@ export const TutorPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] max-w-5xl mx-auto pb-4">
       {/* Top Header bar with status badge */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-[#0f172a] border border-slate-800 shrink-0 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-[#0f172a] border border-slate-800 shrink-0 mb-3 gap-3">
         <div className="flex items-center gap-3">
           <div className="relative p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400">
             <Bot className="w-5 h-5" />
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#0f172a]" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white tracking-tight">Source-Grounded AI Tutor</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-bold text-white tracking-tight">Adaptive AI Tutor</h2>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" /> Grounding Guard Active
+                <Sparkles className="w-3 h-3 text-emerald-400" /> Auto Mode (Default)
               </span>
+              {profile && (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
+                  {profile.education_level === 'school'
+                    ? `${profile.grade_or_course} (${profile.board_or_specialization || 'CBSE'})`
+                    : profile.education_level === 'college'
+                    ? `${profile.grade_or_course} • ${profile.academic_year || 'College'}`
+                    : `Self-Learner (${profile.difficulty_level || 'Adaptive'})`}
+                </span>
+              )}
             </div>
-            <p className="text-[11px] text-slate-400">
-              Citations linked to verified course PDFs, lecture slides, notes, and transcripts.
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Auto-retrieves uploaded course materials when available, or provides leveled explanations via general AI knowledge.
             </p>
           </div>
         </div>
 
-        <button
-          onClick={clearChat}
-          className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition-colors"
-        >
-          Reset Session
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={clearChat}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition-colors"
+          >
+            Reset Session
+          </button>
+        </div>
       </div>
+
+      {/* Subject Filter Selector */}
+      {profile?.selected_subjects && profile.selected_subjects.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <span className="text-[11px] font-semibold text-slate-400 shrink-0">Focus Subject:</span>
+          <button
+            onClick={() => setActiveSubject(null)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-all ${
+              activeSubject === null
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            }`}
+          >
+            All Subjects
+          </button>
+          {profile.selected_subjects.map(sub => {
+            const isSelected = activeSubject === sub;
+            return (
+              <button
+                key={sub}
+                onClick={() => setActiveSubject(isSelected ? null : sub)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-all ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-sm'
+                    : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+                }`}
+              >
+                {sub}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Chat Messages Body */}
       <div className="flex-1 overflow-y-auto space-y-4 px-1 pr-2">
@@ -131,12 +178,27 @@ export const TutorPage: React.FC = () => {
             >
               {/* Header inside tutor message */}
               {msg.sender === 'tutor' && (
-                <div className="flex items-center justify-between pb-2 border-b border-slate-800/80 text-[11px]">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-slate-300">StudyMate AI</span>
+                <div className="flex flex-wrap items-center justify-between pb-2 border-b border-slate-800/80 text-[11px] gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="font-semibold text-slate-200">StudyMate AI</span>
                     {msg.topicTag && (
                       <span className="px-1.5 py-0.2 rounded bg-slate-800 text-sky-300 text-[10px] font-mono">
                         {msg.topicTag}
+                      </span>
+                    )}
+
+                    {/* Grounding Mode Badge */}
+                    {msg.mode === 'source_grounded' || (msg.citations && msg.citations.length > 0) ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-medium flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-emerald-400" /> Grounded in Library
+                      </span>
+                    ) : msg.mode === 'strict_insufficient' || msg.unverifiedReason ? (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-medium flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3 text-amber-400" /> Strict Grounding
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10px] font-medium flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-indigo-400" /> General AI (Calibrated)
                       </span>
                     )}
                   </div>
@@ -163,18 +225,28 @@ export const TutorPage: React.FC = () => {
                 {msg.text}
               </div>
 
-              {/* Unverified / Out-of-Domain Notice Banner */}
-              {!msg.isGrounded && msg.unverifiedReason && (
+              {/* General AI Notice */}
+              {msg.sender === 'tutor' && !msg.citations?.length && !msg.unverifiedReason && msg.mode !== 'strict_insufficient' && (
+                <div className="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-slate-300 flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <span>
+                    Personalized AI explanation calibrated for your level. Not verified against uploaded library documents.
+                  </span>
+                </div>
+              )}
+
+              {/* Unverified / Strict Grounding Notice Banner */}
+              {(msg.mode === 'strict_insufficient' || (!msg.isGrounded && msg.unverifiedReason)) && (
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold text-amber-400 text-xs">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>Hallucination Guardrail Triggered</span>
+                    <span>Strict Grounding Guardrail</span>
                   </div>
                   <p className="text-[11px] text-amber-200/90 leading-normal">
-                    {msg.unverifiedReason}
+                    {msg.unverifiedReason || "No matching material was found in your learning library for this question."}
                   </p>
                   <div className="pt-1 text-[10px] text-amber-400/80 italic">
-                    Answer was not hallucinated from non-library web trivia to protect academic rigor.
+                    Strict mode prevents non-library answers. Disable strict mode or ask in Auto Mode for general explanations.
                   </div>
                 </div>
               )}

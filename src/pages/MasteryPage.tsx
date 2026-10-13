@@ -31,10 +31,14 @@ export const MasteryPage: React.FC = () => {
     refreshMasteryAndRecs,
     launchQuizWithConfig,
     setCurrentPage,
-    apiMode
+    apiMode,
+    profile,
+    activeSubject,
+    setActiveSubject
   } = useStudy();
 
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>('all');
 
   // Determine whether to use real backend data or fallback
   const isUsingBackend = apiMode === 'fastapi-connected' && backendMastery && backendMastery.length > 0;
@@ -78,8 +82,12 @@ export const MasteryPage: React.FC = () => {
       }));
 
   const filteredTopics = displayTopics.filter(t => {
-    if (filterStatus === 'all') return true;
-    return t.status === filterStatus;
+    const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
+    const matchesSubject =
+      selectedSubjectFilter === 'all' ||
+      t.category.toLowerCase().includes(selectedSubjectFilter.toLowerCase()) ||
+      t.topicName.toLowerCase().includes(selectedSubjectFilter.toLowerCase());
+    return matchesStatus && matchesSubject;
   });
 
   const strongTopics = displayTopics.filter(t => t.status === 'strong');
@@ -305,7 +313,7 @@ export const MasteryPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
             {['all', 'strong', 'developing', 'weak', 'insufficient_history'].map(f => (
               <button
@@ -322,6 +330,36 @@ export const MasteryPage: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Subject Filter Pills */}
+        {profile?.selected_subjects && profile.selected_subjects.length > 0 && (
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+            <span className="text-[11px] font-semibold text-slate-400 shrink-0">Filter by Subject:</span>
+            <button
+              onClick={() => setSelectedSubjectFilter('all')}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                selectedSubjectFilter === 'all'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+              }`}
+            >
+              All Subjects
+            </button>
+            {profile.selected_subjects.map(s => (
+              <button
+                key={s}
+                onClick={() => setSelectedSubjectFilter(selectedSubjectFilter === s ? 'all' : s)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
+                  selectedSubjectFilter === s
+                    ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white'
+                    : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* List of topic progress bars */}
         <div className="space-y-3.5">

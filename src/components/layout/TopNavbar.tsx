@@ -36,6 +36,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
     switch (currentPage) {
       case 'dashboard':
         return { title: 'Dashboard', desc: 'Real-time learning overview & adaptive signals' };
+      case 'onboarding':
+        return { title: 'Education Profile', desc: 'Configure learning path, academic stage, and subjects' };
       case 'library':
         return { title: 'Learning Library', desc: 'Source document indexing, transcripts, and chunk vectorization' };
       case 'tutor':

@@ -22,10 +22,11 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { uploadRealFile, apiMode } = useStudy();
+  const { uploadRealFile, apiMode, profile } = useStudy();
 
   const [title, setTitle] = useState('');
-  const [topic, setTopic] = useState('Transformers & LLMs');
+  const [topic, setTopic] = useState('Core Fundamentals');
+  const [subject, setSubject] = useState(profile?.selected_subjects?.[0] || 'General');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -80,7 +81,7 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
     setErrorMsg('');
 
     try {
-      await uploadRealFile(selectedFile, title.trim() || selectedFile.name, topic);
+      await uploadRealFile(selectedFile, title.trim() || selectedFile.name, topic, subject);
       setIsUploading(false);
       onClose();
     } catch (err: any) {
@@ -210,26 +211,49 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
                 required
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder="e.g. Scaled Dot-Product Attention Proofs"
+                placeholder="e.g. Chapter 4 Notes, Lecture 5 Slides"
                 className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1">
-                Curriculum Topic *
+                Assign Subject *
               </label>
-              <select
+              <div className="flex gap-2">
+                <select
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                >
+                  {profile?.selected_subjects && profile.selected_subjects.length > 0 ? (
+                    profile.selected_subjects.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="General">General</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Science">Science</option>
+                    </>
+                  )}
+                  <option value="Other / Custom">Other / Custom</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-medium text-slate-300 mb-1">
+                Curriculum Topic / Chapter
+              </label>
+              <input
+                type="text"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
+                placeholder="e.g. Relational Calculus, Photosynthesis, Scaled Attention"
                 className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
-              >
-                <option value="Transformers & LLMs">Transformers & LLMs</option>
-                <option value="Multimodal Learning">Multimodal Learning</option>
-                <option value="Optimization & Loss Functions">Optimization & Loss Functions</option>
-                <option value="Neural Networks">Neural Networks</option>
-                <option value="Model Alignment & RL">Model Alignment & RL</option>
-              </select>
+              />
             </div>
           </div>
 

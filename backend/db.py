@@ -2,6 +2,10 @@ import sqlite3
 import os
 import json
 import shutil
+import hashlib
+import secrets
+import uuid
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
@@ -56,6 +60,49 @@ def get_connection():
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
+
+    # Users table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    )
+    """)
+
+    # Auth sessions table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS sessions (
+        token TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    )
+    """)
+
+    # Student educational profiles table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS student_profiles (
+        id TEXT PRIMARY KEY,
+        user_id TEXT UNIQUE NOT NULL,
+        education_level TEXT NOT NULL,
+        grade_or_course TEXT NOT NULL,
+        board_or_specialization TEXT,
+        academic_year TEXT,
+        semester TEXT,
+        state TEXT,
+        preferred_language TEXT DEFAULT 'English',
+        selected_subjects TEXT NOT NULL,
+        learning_goals TEXT,
+        is_profile_completed INTEGER DEFAULT 1,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    )
+    """)
 
     # Documents table
     cursor.execute("""
@@ -178,6 +225,21 @@ def init_db():
     )
     """)
 
+    # Safe column migrations for existing databases
+    def safe_add_column(table_name: str, col_def: str):
+        try:
+            cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {col_def}")
+        except Exception:
+            pass
+
+    safe_add_column("student_profiles", "difficulty_level TEXT DEFAULT 'intermediate'")
+    safe_add_column("student_profiles", "explanation_style TEXT DEFAULT 'step-by-step'")
+    safe_add_column("documents", "subject TEXT DEFAULT 'General'")
+    safe_add_column("quizzes", "subject TEXT")
+    safe_add_column("quiz_attempts", "subject TEXT")
+    safe_add_column("quiz_attempts", "user_id TEXT")
+    safe_add_column("topic_mastery", "subject TEXT")
+
     conn.commit()
     conn.close()
 
@@ -187,8 +249,8 @@ def insert_document(doc: Dict[str, Any]):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO documents (id, filename, file_type, file_size, title, topic, upload_date, status, error_message, chunk_count, summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO documents (id, filename, file_type, file_size, title, topic, subject, upload_date, status, error_message, chunk_count, summary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         doc["id"],
         doc["filename"],
@@ -196,12 +258,20 @@ def insert_document(doc: Dict[str, Any]):
         doc.get("file_size", "0 KB"),
         doc.get("title", doc["filename"]),
         doc.get("topic", "General"),
+        doc.get("subject", doc.get("topic", "General")),
         doc["upload_date"],
         doc.get("status", "processing"),
         doc.get("error_message"),
         doc.get("chunk_count", 0),
         doc.get("summary", "")
     ))
+    conn.commit()
+    conn.close()
+
+def update_document_subject(doc_id: str, subject: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE documents SET subject = ? WHERE id = ?", (subject.strip(), doc_id))
     conn.commit()
     conn.close()
 
@@ -528,3 +598,224 @@ def upsert_topic_mastery(mastery: Dict[str, Any]):
     ))
     conn.commit()
     conn.close()
+
+# --- User Authentication & Session Operations ---
+
+def hash_password(password: str) -> str:
+    salt = secrets.token_hex(16)
+    pw_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100_000).hex()
+    return f"{salt}:{pw_hash}"
+
+def verify_password(password: str, stored_hash: str) -> bool:
+    try:
+        salt, pw_hash = stored_hash.split(":", 1)
+        calc_hash = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100_000).hex()
+        return secrets.compare_digest(calc_hash, pw_hash)
+    except Exception:
+        return False
+
+def create_user(email: str, password: str, name: str) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    created_at = datetime.utcnow().isoformat()
+    pw_hash = hash_password(password)
+
+    cursor.execute("""
+        INSERT INTO users (id, email, password_hash, name, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, email.lower().strip(), pw_hash, name.strip(), created_at))
+    conn.commit()
+    conn.close()
+
+    return {
+        "id": user_id,
+        "email": email.lower().strip(),
+        "name": name.strip(),
+        "created_at": created_at
+    }
+
+def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, email, password_hash, name, created_at FROM users WHERE email = ?", (email.lower().strip(),))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, email, name, created_at FROM users WHERE id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return None
+
+def create_session(user_id: str, days_valid: int = 30) -> str:
+    conn = get_connection()
+    cursor = conn.cursor()
+    token = secrets.token_urlsafe(32)
+    created_at = datetime.utcnow()
+    expires_at = created_at + timedelta(days=days_valid)
+
+    cursor.execute("""
+        INSERT INTO sessions (token, user_id, created_at, expires_at)
+        VALUES (?, ?, ?, ?)
+    """, (token, user_id, created_at.isoformat(), expires_at.isoformat()))
+    conn.commit()
+    conn.close()
+    return token
+
+def get_user_by_token(token: str) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT u.id, u.email, u.name, u.created_at, s.expires_at
+        FROM sessions s
+        JOIN users u ON s.user_id = u.id
+        WHERE s.token = ?
+    """, (token,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    # Check expiration
+    expires_at = datetime.fromisoformat(row["expires_at"])
+    if datetime.utcnow() > expires_at:
+        delete_session(token)
+        return None
+
+    return {
+        "id": row["id"],
+        "email": row["email"],
+        "name": row["name"],
+        "created_at": row["created_at"]
+    }
+
+def delete_session(token: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sessions WHERE token = ?", (token,))
+    conn.commit()
+    conn.close()
+
+# --- Student Profile Operations ---
+
+def get_student_profile(user_id: str) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, user_id, education_level, grade_or_course, board_or_specialization,
+               academic_year, semester, state, preferred_language, selected_subjects,
+               learning_goals, difficulty_level, explanation_style,
+               is_profile_completed, created_at, updated_at
+        FROM student_profiles
+        WHERE user_id = ?
+    """, (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return None
+
+    data = dict(row)
+    try:
+        data["selected_subjects"] = json.loads(data["selected_subjects"])
+    except Exception:
+        data["selected_subjects"] = []
+    data["is_profile_completed"] = bool(data["is_profile_completed"])
+    data["difficulty_level"] = data.get("difficulty_level") or "intermediate"
+    data["explanation_style"] = data.get("explanation_style") or "step-by-step"
+    return data
+
+def upsert_student_profile(user_id: str, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    existing = get_student_profile(user_id) or {}
+    now = datetime.utcnow().isoformat()
+
+    subjects_json = json.dumps(profile_data.get("selected_subjects", existing.get("selected_subjects", [])))
+    is_completed = 1 if profile_data.get("is_profile_completed", existing.get("is_profile_completed", True)) else 0
+
+    if profile_data.get("education_level") == "self":
+        resolved_grade = profile_data.get("grade_or_course") or "Self-Learner"
+    else:
+        resolved_grade = (
+            profile_data.get("grade_or_course")
+            or existing.get("grade_or_course")
+            or "General"
+        )
+
+    if existing and existing.get("id"):
+        cursor.execute("""
+            UPDATE student_profiles
+            SET education_level = ?,
+                grade_or_course = ?,
+                board_or_specialization = ?,
+                academic_year = ?,
+                semester = ?,
+                state = ?,
+                preferred_language = ?,
+                selected_subjects = ?,
+                learning_goals = ?,
+                difficulty_level = ?,
+                explanation_style = ?,
+                is_profile_completed = ?,
+                updated_at = ?
+            WHERE user_id = ?
+        """, (
+            profile_data.get("education_level", existing.get("education_level", "college")),
+            resolved_grade,
+            profile_data.get("board_or_specialization", existing.get("board_or_specialization")),
+            profile_data.get("academic_year", existing.get("academic_year")),
+            profile_data.get("semester", existing.get("semester")),
+            profile_data.get("state", existing.get("state")),
+            profile_data.get("preferred_language", existing.get("preferred_language", "English")),
+            subjects_json,
+            profile_data.get("learning_goals", existing.get("learning_goals")),
+            profile_data.get("difficulty_level", existing.get("difficulty_level", "intermediate")),
+            profile_data.get("explanation_style", existing.get("explanation_style", "step-by-step")),
+            is_completed,
+            now,
+            user_id
+        ))
+    else:
+        profile_id = f"prof_{uuid.uuid4().hex[:12]}"
+        cursor.execute("""
+            INSERT INTO student_profiles (
+                id, user_id, education_level, grade_or_course, board_or_specialization,
+                academic_year, semester, state, preferred_language, selected_subjects,
+                learning_goals, difficulty_level, explanation_style,
+                is_profile_completed, created_at, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            profile_id,
+            user_id,
+            profile_data.get("education_level", "college"),
+            resolved_grade,
+            profile_data.get("board_or_specialization"),
+            profile_data.get("academic_year"),
+            profile_data.get("semester"),
+            profile_data.get("state"),
+            profile_data.get("preferred_language", "English"),
+            subjects_json,
+            profile_data.get("learning_goals"),
+            profile_data.get("difficulty_level", "intermediate"),
+            profile_data.get("explanation_style", "step-by-step"),
+            is_completed,
+            now,
+            now
+        ))
+
+    conn.commit()
+    conn.close()
+    return get_student_profile(user_id)
+

@@ -29,13 +29,18 @@ export const LibraryPage: React.FC = () => {
     selectedResourceForPreview,
     setSelectedResourceForPreview,
     isLoadingMaterials,
-    refreshMaterials
+    refreshMaterials,
+    profile,
+    activeSubject,
+    setActiveSubject,
+    updateResourceSubject
   } = useStudy();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
+  const [editingSubjectDocId, setEditingSubjectDocId] = useState<string | null>(null);
 
   // Topics extracted from resources
   const topics = ['All', ...Array.from(new Set(resources.map(r => r.topic)))];
@@ -47,11 +52,12 @@ export const LibraryPage: React.FC = () => {
       res.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       res.fileName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTopic = selectedTopic === 'All' || res.topic === selectedTopic;
+    const matchesSubject = !activeSubject || res.subject === activeSubject;
     const matchesType =
       selectedType === 'All' ||
       res.fileType === selectedType ||
       (selectedType === 'mp4' && ['mp4', 'webm', 'video'].includes(res.fileType));
-    return matchesSearch && matchesTopic && matchesType;
+    return matchesSearch && matchesTopic && matchesSubject && matchesType;
   });
 
   const getFileTypeIcon = (type: FileType) => {
@@ -130,6 +136,62 @@ export const LibraryPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Education Profile Context Banner */}
+      {profile && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-slate-900 to-slate-950 border border-indigo-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                {profile.education_level.toUpperCase()} LIBRARY
+              </span>
+              <span className="text-xs font-bold text-white">
+                {profile.education_level === 'school'
+                  ? `${profile.grade_or_course} • ${profile.board_or_specialization || 'CBSE'} Board`
+                  : profile.education_level === 'college'
+                  ? `${profile.grade_or_course} • ${profile.academic_year || 'College'} • ${profile.board_or_specialization || 'Engineering'}`
+                  : `Self-Learner • ${profile.board_or_specialization || 'AI Focus'}`}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              {profile.education_level === 'school'
+                ? 'Recommended categories: NCERT Chapter Notes, Solved Exemplars, Formula Sheets, Practical Lab Manuals'
+                : profile.education_level === 'college'
+                ? 'Recommended categories: University Syllabus Notes, Lecture Slides, Previous Year Papers, Lab Programs'
+                : 'Recommended categories: Technical Whitepapers, Implementation Blueprints, Project Repos, Deep-Dive Guides'}
+            </p>
+          </div>
+
+          {profile.selected_subjects && profile.selected_subjects.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto text-xs shrink-0">
+              <span className="text-[11px] font-semibold text-slate-400">Filter Subject:</span>
+              <button
+                onClick={() => setActiveSubject(null)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  activeSubject === null
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                }`}
+              >
+                All
+              </button>
+              {profile.selected_subjects.map(sub => (
+                <button
+                  key={sub}
+                  onClick={() => setActiveSubject(activeSubject === sub ? null : sub)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
+                    activeSubject === sub
+                      ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white'
+                      : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  {sub}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Filter and Search Bar */}
       <div className="p-4 rounded-xl bg-[#0f172a] border border-slate-800 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Search Input */}
@@ -179,7 +241,10 @@ export const LibraryPage: React.FC = () => {
 
       {/* Resource Count info */}
       <div className="flex items-center justify-between text-xs text-slate-400 px-1">
-        <span>Showing {filteredResources.length} of {resources.length} indexed documents</span>
+        <span>
+          Showing {filteredResources.length} of {resources.length} indexed documents
+          {activeSubject && <strong className="text-sky-300 ml-1">in {activeSubject}</strong>}
+        </span>
         <span className="font-mono text-[11px] text-slate-400">
           Total chunks: {resources.reduce((sum, r) => sum + r.chunkCount, 0)} | Grounding status: Active
         </span>
@@ -236,8 +301,36 @@ export const LibraryPage: React.FC = () => {
                   {res.summary}
                 </p>
 
-                {/* Topic & Metadata */}
+                {/* Topic & Subject Metadata */}
                 <div className="mt-4 flex flex-wrap items-center gap-1.5">
+                  {/* Subject Badge / Reassign Dropdown */}
+                  {editingSubjectDocId === res.id ? (
+                    <select
+                      value={res.subject || 'General'}
+                      onChange={e => {
+                        updateResourceSubject(res.id, e.target.value);
+                        setEditingSubjectDocId(null);
+                      }}
+                      onBlur={() => setEditingSubjectDocId(null)}
+                      autoFocus
+                      className="px-2 py-0.5 rounded text-[11px] bg-slate-950 text-sky-300 border border-indigo-500 focus:outline-none"
+                    >
+                      {profile?.selected_subjects?.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                      <option value="General">General</option>
+                    </select>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setEditingSubjectDocId(res.id)}
+                      title="Click to reassign subject"
+                      className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition-colors flex items-center gap-1"
+                    >
+                      <span>📚 {res.subject || 'General'}</span>
+                    </button>
+                  )}
+
                   <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">
                     {res.topic}
                   </span>

@@ -3,21 +3,16 @@ import {
   BrainCircuit,
   CheckCircle2,
   XCircle,
-  HelpCircle,
   ArrowRight,
   RotateCcw,
-  BookOpen,
-  Award,
   Sparkles,
-  Layers,
   ChevronRight,
   ChevronLeft,
   TrendingUp,
-  Flame,
   Check,
   Loader2,
   AlertTriangle,
-  FileText,
+  BookOpen,
   Clock,
   RefreshCw,
   ExternalLink
@@ -30,7 +25,6 @@ export const QuizPage: React.FC = () => {
   const {
     resources,
     apiMode,
-    apiEndpoint,
     generateQuizFromBackend,
     submitQuizToBackend,
     backendMastery,
@@ -39,7 +33,9 @@ export const QuizPage: React.FC = () => {
     setCurrentPage,
     setSelectedResourceForPreview,
     quizAttempts,
-    saveQuizAttempt
+    saveQuizAttempt,
+    profile,
+    activeSubject
   } = useStudy();
 
   const [quizState, setQuizState] = useState<'setup' | 'generating' | 'active' | 'submitting' | 'results'>('setup');
@@ -79,11 +75,18 @@ export const QuizPage: React.FC = () => {
     }
   }, [quizLauncherConfig, clearQuizLauncherConfig]);
 
-  // Derived available topics from documents & mastery
+  useEffect(() => {
+    if (activeSubject && !quizLauncherConfig?.topic) {
+      setSelectedTopic(activeSubject);
+    }
+  }, [activeSubject, quizLauncherConfig]);
+
+  // Derived available topics from enrolled subjects, documents & mastery
   const availableTopics = [
     'All Topics',
     ...Array.from(
       new Set([
+        ...(profile?.selected_subjects || []),
         ...resources.map(r => r.topic),
         ...backendMastery.map(m => m.topic),
         'Neural Networks',

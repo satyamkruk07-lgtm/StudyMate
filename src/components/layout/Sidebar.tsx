@@ -10,7 +10,9 @@ import {
   Flame,
   ChevronRight,
   Sparkles,
-  BookOpen
+  BookOpen,
+  LogOut,
+  Home
 } from 'lucide-react';
 import { useStudy } from '../../context/StudyContext';
 import { PageId } from '../../types';
@@ -21,7 +23,17 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { currentPage, setCurrentPage, resources, masteryData, streakDays } = useStudy();
+  const {
+    currentPage,
+    setCurrentPage,
+    resources,
+    masteryData,
+    streakDays,
+    user,
+    profile,
+    logout,
+    isAuthenticated
+  } = useStudy();
 
   const weakCount = masteryData.filter(m => m.status === 'weak').length;
 
@@ -191,15 +203,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {/* User profile footer */}
           <div className="flex items-center justify-between pt-1 text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-slate-800 border border-indigo-500/40 flex items-center justify-center font-bold text-xs text-indigo-300">
-                SK
+            <div
+              onClick={() => {
+                setCurrentPage('onboarding');
+                onClose();
+              }}
+              className="flex items-center gap-2.5 cursor-pointer group"
+              title="Click to edit education profile"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-800 border border-indigo-500/40 flex items-center justify-center font-bold text-xs text-indigo-300 group-hover:border-indigo-400 transition-colors">
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'SK'}
               </div>
-              <div>
-                <div className="font-semibold text-slate-200">Satyam K.</div>
-                <div className="text-[11px] text-slate-400">IIT Mandi Candidate</div>
+              <div className="truncate max-w-[130px]">
+                <div className="font-semibold text-slate-200 group-hover:text-white transition-colors truncate">
+                  {user?.name || 'Satyam K.'}
+                </div>
+                <div className="text-[11px] text-slate-400 truncate">
+                  {profile?.grade_or_course || 'Track D Learner'}
+                </div>
               </div>
             </div>
+
+            <button
+              onClick={() => {
+                if (isAuthenticated) {
+                  logout();
+                } else {
+                  setCurrentPage('home');
+                }
+                onClose();
+              }}
+              title={isAuthenticated ? 'Log Out' : 'Return to Public Home'}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>
