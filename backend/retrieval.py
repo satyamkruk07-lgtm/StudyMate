@@ -70,15 +70,15 @@ class BM25Retriever:
             if clean_q and clean_q in c["title"].lower():
                 score += 3.0
 
-            # Bonus when chunk aligns with user's selected educational subject
-            if subject and subject.strip():
+            # Bonus when chunk aligns with user's selected educational subject ONLY IF query terms matched
+            if score > 0 and subject and subject.strip():
                 sub_clean = subject.strip().lower()
                 chunk_topic = c.get("topic", "").lower()
                 chunk_title = c.get("title", "").lower()
                 if sub_clean in chunk_topic or chunk_topic in sub_clean:
-                    score += 3.5
+                    score += 1.5
                 elif sub_clean in chunk_title:
-                    score += 2.0
+                    score += 1.0
 
             scores.append((score, c))
 
@@ -92,10 +92,14 @@ class BM25Retriever:
                 res_item["relevance_score"] = round(s, 2)
                 top_results.append(res_item)
 
-        # Check if the highest scoring chunk meets the sufficiency threshold
+        # Check if the highest scoring chunk meets the sufficiency threshold and has meaningful term overlap
         has_sufficient = False
         if top_results and top_results[0]["relevance_score"] >= score_threshold:
-            has_sufficient = True
+            best_chunk_text = (top_results[0].get("content", "") + " " + top_results[0].get("title", "")).lower()
+            matched_count = sum(1 for term in filtered_query if term in best_chunk_text)
+            # Require at least 2 matching terms or 50% overlap of query terms
+            if matched_count >= min(2, len(filtered_query)):
+                has_sufficient = True
 
         return top_results, has_sufficient
 

@@ -1249,107 +1249,163 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsChatThinking(false);
     };
 
-    // 1. C Language & Systems Programming
-    if (
-      promptLower.includes('c language') ||
-      promptLower.includes('c programming') ||
-      promptLower === 'c' ||
-      promptLower.includes('pointers in c') ||
-      promptLower.includes('learn c')
-    ) {
-      const richCResponse = `### Conceptual Explanation: C Programming Language in Computer Science
+    // 1. C++ Language
+    if (promptLower.includes('c++') || /\b(cpp|stl|vector in c\+\+|virtual function|raii|oop in c\+\+)\b/i.test(promptLower)) {
+      const richCppResponse = `### Conceptual Explanation: C++ & Object-Oriented Systems Design
 
-Since you are studying at the **${userStage}** level, let's examine the **C Language** through the lens of a systems and computer science engineer.
-
-Developed by **Dennis Ritchie** at Bell Laboratories in 1972, C is a statically typed, compiled, procedural programming language. Often described as a "middle-level language," it provides high-level structured control flow constructs while simultaneously granting low-level access to memory addresses and hardware registers.
+In university computer science for **${userStage}**, **C++** (created by Bjarne Stroustrup) expands C with Object-Oriented, Generic, and Functional programming paradigms. Here is a 5-point explanation:
 
 ---
 
-### 1. Key Characteristics of C for Engineers
-
-* **Direct Memory Manipulation:** Through explicit pointers, C gives developers direct control over physical and virtual memory addresses, allowing low-overhead hardware interfacing.
-* **Compiled & Statically Typed:** Source code is transformed directly into machine code via ahead-of-time (AOT) compilers (like \`gcc\` or \`clang\`), yielding near zero-overhead runtime performance.
-* **Deterministic Resource Management:** Unlike garbage-collected environments (Python, Java), memory allocation (\`malloc\`, \`calloc\`) and deallocation (\`free\`) are manual and strictly deterministic.
-* **Procedural & Modular:** Programs are structured into functions, blocks, and header files, making it the foundational architecture behind modern operating systems (Linux kernel, Windows NT, macOS Darwin).
+### 1. Core Definition & Paradigms
+* C++ is a **multi-paradigm, statically typed, compiled language** built with the philosophy of 'zero-overhead abstraction'.
+* Introduces the 4 pillars of OOP: **Encapsulation**, **Abstraction**, **Inheritance**, and **Polymorphism**.
+* Supports both compile-time polymorphism (Templates, Overloading) and runtime polymorphism (Virtual Functions, Abstract Classes).
 
 ---
 
-### 2. Under the Hood: Memory Layout & Compilation Pipeline
-
-When a C program executes, its address space is divided into discrete virtual memory segments:
-1. **Text (Code) Segment:** Read-only region containing machine instructions.
-2. **Data & BSS Segments:** Initialized global/static variables (\`Data\`) and uninitialized variables (\`BSS\`).
-3. **Heap Segment:** Dynamically allocated memory requested at runtime via \`malloc()\`, growing upwards toward higher addresses.
-4. **Stack Segment:** Local function frames, parameters, and return addresses, growing downwards with strict LIFO allocation.
-
-The **Compilation Pipeline** consists of 4 distinct phases:
-$$\\text{Source (.c)} \\xrightarrow{\\text{Preprocessor}} \\text{Expanded (.i)} \\xrightarrow{\\text{Compiler}} \\text{Assembly (.s)} \\xrightarrow{\\text{Assembler}} \\text{Object (.o)} \\xrightarrow{\\text{Linker}} \\text{Executable}$$
+### 2. Under the Hood: RAII & Virtual Method Tables (vtable)
+* **RAII (Resource Acquisition Is Initialization):** Ties resource acquisition (heap memory, socket connections, mutexes) strictly to object lifetime.
+* **Virtual Method Table (vtable):** When a class has virtual functions, the compiler generates a \`vtable\` of function pointers and injects a hidden pointer (\`vptr\`) into each instance to resolve dynamic calls at runtime.
 
 ---
 
-### 3. Practical Implementation: Dynamic Memory & Pointer Operations
+### 3. Practical Applications & Industry Usage
+* **Game Development:** High-end AAA game engines (Unreal Engine) are built in C++ for real-time graphics rendering.
+* **High-Frequency Trading (HFT):** Low-latency financial algorithms execute trades in nanoseconds using optimized C++.
+* **System Software & AI Frameworks:** Web browser engines (Google Chromium V8/Blink) and deep learning backends (PyTorch, TensorFlow) are written in C++.
 
-Here is an engineering example demonstrating dynamic array allocation, pointer arithmetic, and safe memory deallocation in C:
+---
 
-\`\`\`c
-#include <stdio.h>
-#include <stdlib.h>
+### 4. Step-by-Step Code Example: RAII & Class Design
+\`\`\`cpp
+#include <iostream>
+#include <vector>
+#include <string>
 
-typedef struct {
-    int *data;
-    size_t capacity;
-    size_t size;
-} DynamicBuffer;
+class Student {
+private:
+    std::string name;
+    int rollNumber;
 
-// Initialize dynamic buffer on heap
-DynamicBuffer* create_buffer(size_t capacity) {
-    DynamicBuffer *buf = (DynamicBuffer*)malloc(sizeof(DynamicBuffer));
-    if (!buf) return NULL;
-    buf->data = (int*)malloc(capacity * sizeof(int));
-    buf->capacity = capacity;
-    buf->size = 0;
-    return buf;
-}
+public:
+    Student(std::string n, int r) : name(n), rollNumber(r) {}
 
-// Push element with O(1) pointer assignment
-void push_element(DynamicBuffer *buf, int value) {
-    if (buf->size < buf->capacity) {
-        *(buf->data + buf->size) = value; // Pointer arithmetic
-        buf->size++;
+    void display() const {
+        std::cout << "Student: " << name << " | Roll No: " << rollNumber << std::endl;
     }
-}
+};
 
-// Clean up heap allocations to prevent memory leaks
-void free_buffer(DynamicBuffer *buf) {
-    if (buf) {
-        free(buf->data);
-        free(buf);
+int main() {
+    std::vector<Student> batch;
+    batch.push_back(Student("Aarav", 101));
+    batch.push_back(Student("Diya", 102));
+
+    for (const auto& s : batch) {
+        s.display();
     }
-}
-
-int main(void) {
-    DynamicBuffer *my_buf = create_buffer(5);
-    push_element(my_buf, 10);
-    push_element(my_buf, 20);
-    push_element(my_buf, 30);
-
-    printf("Buffer Size: %zu / %zu\\n", my_buf->size, my_buf->capacity);
-    printf("First Element: %d, Second: %d\\n", *(my_buf->data), *(my_buf->data + 1));
-
-    free_buffer(my_buf);
     return 0;
 }
 \`\`\`
 
 ---
 
-### 4. Pros & Cons of C in Computer Science
+### 5. Key Trade-offs & Summary Comparison Table
 
-| Advantages (+) | Engineering Constraints (-) |
-| :--- | :--- |
-| **Maximal Performance:** Generates lean, native assembly without VM overhead or garbage collector pauses. | **Manual Memory Pitfalls:** Prone to memory leaks, dangling pointers, double-free errors, and buffer overflows. |
-| **Direct Hardware Control:** Ideal for embedded firmware, microcontroller programming, and OS kernel development. | **No Native OOP Support:** Lacks built-in classes, polymorphism, or RAII; requires procedural patterns. |
-| **Minimal Runtime Footprint:** Executables run seamlessly on memory-constrained IoT and microchips. | **Steep Learning Curve:** Debugging segmentation faults (\`SIGSEGV\`) requires deep understanding of memory architecture. |
+| Metric | C++ Advantage (+) | Engineering Constraint (-) |
+| :--- | :--- | :--- |
+| **Abstraction Level** | Expressive syntax without sacrificing low-level performance. | Large and complex language specification. |
+| **Standard Library** | STL provides rich containers (\`vector\`, \`map\`, \`unordered_set\`, \`algorithm\`). | Compilation times can be slow due to heavy template expansions. |
+| **Resource Safety** | Smart pointers (\`std::unique_ptr\`, \`std::shared_ptr\`) eliminate manual leaks. | Undefined behavior still possible with raw pointer misuse. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richCppResponse);
+      return;
+    }
+
+    // 2. C Language & Systems Programming
+    if (
+      !promptLower.includes('c++') &&
+      !promptLower.includes('c#') &&
+      !promptLower.includes('css') &&
+      (/\b(c language|c programming|pointers in c|malloc|gcc|dennis ritchie)\b/i.test(promptLower) ||
+       /\bc\b(?!\+)/i.test(promptLower))
+    ) {
+      const richCResponse = `### Conceptual Explanation: C Programming Language in Systems Architecture
+
+For students in **${userStage}**, **C** is the foundational systems programming language developed by **Dennis Ritchie** at Bell Laboratories in 1972. Here is a comprehensive 5-point explanation:
+
+---
+
+### 1. Core Definition & Philosophical Foundation
+* C is a **statically-typed, compiled, procedural language** often designated as a 'middle-level language'.
+* It balances the structured control constructs of high-level programming (loops, conditionals, functions) with low-level direct access to physical memory addresses and CPU registers.
+* The design philosophy prioritizes minimal runtime overhead, deterministic execution, and portability across heterogeneous hardware architectures.
+
+---
+
+### 2. Systems Architecture & Memory Layout
+When a compiled C program runs, its virtual address space is organized into 5 distinct memory segments:
+* **Text (Code) Segment:** Read-only region containing machine instructions.
+* **Data Segment & BSS:** Initialized global/static variables (\`Data\`) and zero-initialized variables (\`BSS\`).
+* **Heap:** Dynamically allocated memory requested at runtime via \`malloc()\`, \`calloc()\`, and freed using \`free()\`.
+* **Stack:** Function call frames, local variables, and return addresses allocated and freed automatically in LIFO order.
+* **Compilation Pipeline:** Source (\`.c\`) -> Preprocessor (\`.i\`) -> Compiler (\`.s\`) -> Assembler (\`.o\`) -> Linker -> Executable Binary.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Operating System Kernels:** Over 90% of the Linux kernel, Windows NT kernel, and macOS Darwin are implemented in C.
+* **Embedded & IoT Devices:** Microcontrollers (ARM Cortex, AVR, PIC) rely on C for zero-overhead hardware control.
+* **Database Storage Engines:** PostgreSQL, SQLite, and MySQL core engines are written in C for maximum I/O throughput.
+
+---
+
+### 4. Step-by-Step Code Example: Dynamic Memory & Pointers
+\`\`\`c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    int capacity = 5;
+    // 1. Allocate heap memory for 5 integers
+    int *numbers = (int*)malloc(capacity * sizeof(int));
+    if (numbers == NULL) {
+        printf("Memory allocation failed!\\n");
+        return 1;
+    }
+
+    // 2. Populate array using pointer arithmetic
+    for (int i = 0; i < capacity; i++) {
+        *(numbers + i) = (i + 1) * 10;
+    }
+
+    // 3. Print stored values
+    printf("Dynamic Array Elements: ");
+    for (int i = 0; i < capacity; i++) {
+        printf("%d ", *(numbers + i));
+    }
+    printf("\\n");
+
+    // 4. Free heap memory to prevent memory leaks
+    free(numbers);
+    numbers = NULL;
+    return 0;
+}
+\`\`\`
+
+---
+
+### 5. Key Trade-offs & Summary Comparison Table
+
+| Feature / Metric | C Language Advantage (+) | Engineering Constraint (-) |
+| :--- | :--- | :--- |
+| **Execution Speed** | Compiles directly to native assembly; unmatched raw performance. | No garbage collection; manual memory management required. |
+| **Hardware Access** | Direct pointer manipulation of memory and hardware registers. | Risk of segmentation faults (\`SIGSEGV\`), buffer overflows, and memory leaks. |
+| **Runtime Footprint** | Extremely small binary size; runs on microchips with kilobytes of RAM. | Lacks modern language constructs (classes, exceptions, templates). |
 
 ---
 
@@ -1359,169 +1415,932 @@ int main(void) {
       return;
     }
 
-    // 2. Python Variables & DSA
-    if (promptLower.includes('python') || promptLower.includes('variable') || promptLower.includes('stack') || promptLower.includes('dsa')) {
-      const richPythonResponse = `### Conceptual Explanation: Python in Data Structures & Algorithms
+    // 3. Java Language
+    if (/\b(java|jvm|garbage collection in java|jdk|jre|classloader)\b/i.test(promptLower)) {
+      const richJavaResponse = `### Conceptual Explanation: Java & Virtual Machine Architecture
 
-Since you are diving into **Data Structures & Algorithms (DSA)** at the **${userStage}** level, let's look at **Python** through the lens of a computer science engineer.
-
-While Python is often introduced as a beginner-friendly, high-level scripting language, in a DSA context, it is a powerful tool with unique memory management, built-in data structures, and trade-offs in performance compared to lower-level languages like C or C++.
-
-Here is a step-by-step breakdown of Python as a computer science student needs to understand it:
+In university coursework for **${userStage}**, **Java** (designed by James Gosling at Sun Microsystems) is a class-based, object-oriented language famous for 'Write Once, Run Anywhere' (WORA). Here is a 5-point explanation:
 
 ---
 
-### 1. Key Characteristics of Python for DSA
-
-* **Dynamically Typed:** You don't need to declare variable types (e.g., \`int x = 5;\`). Python infers types at runtime, which speeds up prototyping during coding assessments and competitive programming.
-* **Garbage Collected:** Memory allocation and deallocation happen automatically. You don't have to manually manage pointers or use \`malloc()\` and \`free()\` like in C.
-* **Batteries Included (Built-in Data Structures):** Python comes with highly optimized built-in structures:
-  * **Lists:** Dynamic arrays under the hood with amortized $O(1)$ append.
-  * **Dictionaries:** Hash maps implemented using hash tables providing $O(1)$ average lookups.
-  * **Sets:** Hash sets providing set-theoretic operations with unique elements.
-  * **Tuples:** Immutable sequences.
-* **Object-Oriented:** Everything in Python is an object, meaning you can easily implement complex data structures like Graphs, Trees, and Linked Lists using classes and objects.
+### 1. Core Definition & The Java Philosophy
+* Java is a **strictly object-oriented, strongly-typed language** designed for network computing and platform independence.
+* Source code (\`.java\`) compiles into intermediate bytecode (\`.class\`), which is executed by the **Java Virtual Machine (JVM)**.
+* Emphasizes memory safety by eliminating explicit memory pointers and providing automatic garbage collection.
 
 ---
 
-### 2. Python Under the Hood (CPython & Memory)
-
-Standard Python is implemented in C (called **CPython**). When you declare a list, say \`arr = [1, 2, 3]\`, Python is actually creating an **array of pointers** pointing to integer objects scattered in memory, rather than a contiguous block of primitive data types.
-
-* *Implication:* This abstraction makes list operations very flexible, but it can introduce overhead in terms of memory and execution speed compared to C++ vectors or arrays.
+### 2. Under the Hood: JVM Architecture & Memory Segments
+* **Class Loader Subsystem:** Loads, links, and initializes bytecode into memory.
+* **JVM Memory Segments:**
+  * **Heap:** Shared memory pool where all object instances and arrays reside.
+  * **JVM Stack:** Per-thread frames for local variables, operands, and method calls.
+  * **Metaspace (Method Area):** Class metadata, bytecode, static fields, and constant pool.
+* **Execution Engine:** Interprets bytecode and uses the **Just-In-Time (JIT) Compiler** to translate frequent hotspots into native machine instructions.
 
 ---
 
-### 3. Code Example: Implementing a Stack in Python
+### 3. Practical Applications & Industry Usage
+* **Enterprise Backend Services:** Banking systems and e-commerce backends (Spring Boot, Hibernate, Quarkus).
+* **Android Application Development:** Native Android runtime (ART) builds upon Java/Kotlin foundations.
+* **Big Data Systems:** Apache Kafka, Apache Spark, Hadoop, and Cassandra are written in Java and Scala.
 
-In interviews and DSA courses, you are often asked to implement data structures from scratch. Here is how clean and Pythonic a Stack implementation looks using Object-Oriented Programming:
+---
 
-\`\`\`python
-class Stack:
-    def __init__(self):
-        # Using a standard Python list as the underlying storage
-        self.items = []
+### 4. Step-by-Step Code Example: Encapsulation & Inheritance
+\`\`\`java
+class BankAccount {
+    private String accountNumber;
+    private double balance;
 
-    def is_empty(self):
-        return len(self.items) == 0
+    public BankAccount(String accNo, double initialBalance) {
+        this.accountNumber = accNo;
+        this.balance = initialBalance;
+    }
 
-    def push(self, item):
-        # Time Complexity: O(1) amortized
-        self.items.append(item)
+    public void deposit(double amount) {
+        if (amount > 0) balance += amount;
+    }
 
-    def pop(self):
-        if self.is_empty():
-            raise IndexError("pop from empty stack")
-        # Time Complexity: O(1)
-        return self.items.pop()
+    public double getBalance() {
+        return balance;
+    }
+}
 
-    def peek(self):
-        if self.is_empty():
-            raise IndexError("peek from empty stack")
-        return self.items[-1]
-
-    def size(self):
-        return len(self.items)
-
-# --- Driver Code ---
-if __name__ == '__main__':
-    my_stack = Stack()
-    my_stack.push(10)
-    my_stack.push(20)
-    print("Top element (peek):", my_stack.peek())  # Output: 20
-    print("Popped element:", my_stack.pop())         # Output: 20
-    print("Remaining size:", my_stack.size())        # Output: 1
+public class Main {
+    public static void main(String[] args) {
+        BankAccount acc = new BankAccount("SB-10029", 5000.0);
+        acc.deposit(1500.0);
+        System.out.println("Current Balance: INR " + acc.getBalance());
+    }
+}
 \`\`\`
 
 ---
 
-### 4. Pros & Cons of Using Python for DSA
+### 5. Key Trade-offs & Summary Comparison Table
 
-| Advantages (+) | Disadvantages (-) |
-| :--- | :--- |
-| **Concise Syntax:** Less boilerplate code lets you focus purely on algorithmic logic. | **Slower Execution:** Interpreted nature makes it slower than C/C++ for heavy loops. |
-| **Rich Libraries:** Built-in modules like \`collections\` (\`deque\`, \`defaultdict\`) make writing complex algorithms trivial. | **Recursion Limit:** Python has a default recursion limit (usually 1000) to prevent stack overflows, which requires manual adjustment via \`sys.setrecursionlimit()\` for deep DFS algorithms. |
-| **Arbitrary Precision:** Large numbers do not overflow integer boundaries automatically. | **Memory Overhead:** High object metadata cost compared to raw primitive types. |
+| Metric | Java Advantage (+) | Engineering Constraint (-) |
+| :--- | :--- | :--- |
+| **Portability** | Bytecode executes identically across Windows, Linux, macOS, ARM. | Initial startup latency and JVM memory footprint. |
+| **Memory Safety** | Robust Garbage Collection prevents manual memory leaks. | GC pauses (Stop-The-World) can cause latency spikes in real-time systems. |
+| **Concurrency** | Built-in multithreading (\`Thread\`, \`ExecutorService\`, Virtual Threads). | Higher memory consumption compared to compiled C/C++ binaries. |
 
 ---
 
-💡 *General Knowledge Explanation • Tailored for ${userStage} • Upload custom course notes to your Learning Library to enable source-grounded citations.*`;
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
 
-      sendRichTutorMessage(richPythonResponse);
+      sendRichTutorMessage(richJavaResponse);
       return;
     }
 
-    // 3. DBMS & Normalization
-    if (promptLower.includes('dbms') || promptLower.includes('normalization') || promptLower.includes('sql')) {
-      const richDbmsResponse = `### Conceptual Explanation: Database Normalization & Systems Architecture
+    // 4. Linked Lists
+    if (/\b(linked list|singly linked list|doubly linked list|circular linked list)\b/i.test(promptLower)) {
+      const richLinkedListResponse = `### Conceptual Explanation: Linked List Data Structures
 
-In relational database systems for **${userStage}**, **Normalization** is the formal design technique of decomposing relation schemas to eliminate data redundancy and anomaly risks while preserving functional dependencies.
-
----
-
-### 1. Key Characteristics & The Normal Forms Hierarchy
-
-* **First Normal Form (1NF):** Each column attribute must contain only atomic (indivisible) scalar values, and each record must be unique with a primary key.
-* **Second Normal Form (2NF):** Satisfies 1NF and removes all **partial functional dependencies**—every non-prime attribute must depend fully on the complete primary key (crucial for composite keys).
-* **Third Normal Form (3NF):** Satisfies 2NF and removes all **transitive functional dependencies** ($X \\rightarrow Y$ and $Y \\rightarrow Z$). Non-prime attributes must depend only directly on candidate keys.
-* **Boyce-Codd Normal Form (BCNF):** A stricter version of 3NF where for every non-trivial functional dependency $X \\rightarrow Y$, $X$ must be a superkey.
+In university **Data Structures & Algorithms (DSA)** for **${userStage}**, a **Linked List** is a fundamental linear data structure where elements are not stored at contiguous memory locations. Here is a 5-point explanation:
 
 ---
 
-### 2. Under the Hood: Insertion, Deletion & Update Anomalies
-
-Without normalization, denormalized composite tables produce 3 critical database anomalies:
-1. **Insertion Anomaly:** Cannot record an independent entity (e.g., an instructor) until another related entity (e.g., a student enrollment) is created.
-2. **Deletion Anomaly:** Removing the last record of an entity inadvertently erases other independent historical information.
-3. **Update Anomaly:** Updating a duplicate attribute (e.g., department room number) requires modifying multiple rows, risking inconsistent state if one update fails.
+### 1. Core Definition & Structural Principles
+* A Linked List consists of **nodes**, where each node encapsulates two fields:
+  * **Data:** The value or payload being stored.
+  * **Next Pointer (\`next\`):** A memory reference pointing to the subsequent node in the sequence.
+* The list begins at a **Head** pointer and terminates with a node whose pointer references \`NULL\` / \`None\`.
+* Variants include **Singly Linked Lists**, **Doubly Linked Lists** (having both \`prev\` and \`next\` pointers), and **Circular Linked Lists**.
 
 ---
 
-### 3. Practical SQL Schema Design (3NF Compliant)
+### 2. Under the Hood: Heap Allocation vs Contiguous Arrays
+* **Dynamic Memory Sizing:** While arrays require a fixed contiguous block of memory allocated upfront, linked list nodes are individually allocated on the **heap** as needed.
+* **Insertion & Deletion:** Inserting or deleting a node at the head takes **O(1) constant time** by simply updating pointers, without shifting subsequent elements.
+* **Traversal & Random Access:** Arrays allow O(1) index access (\`arr[i]\`), whereas linked lists require **O(n) linear traversal** because memory addresses must be navigated sequentially pointer by pointer.
 
+---
+
+### 3. Practical Applications & Real-World Use Cases
+* **OS Memory Allocation:** Free memory blocks on the OS heap are maintained using linked lists (Free Lists).
+* **Undo / Redo Buffers:** Applications and text editors use doubly linked lists to navigate historical state changes.
+* **Underlying Building Block:** Stacks, Queues, Hash Table chaining (collision resolution), and LRU Caches are implemented using linked lists.
+
+---
+
+### 4. Step-by-Step Code Example: Singly Linked List
+\`\`\`python
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert_at_beginning(self, data):
+        # Time Complexity: O(1)
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def display(self):
+        # Traverse and print all nodes: O(n)
+        current = self.head
+        elements = []
+        while current:
+            elements.append(str(current.data))
+            current = current.next
+        print(' -> '.join(elements) + ' -> NULL')
+
+if __name__ == '__main__':
+    ll = LinkedList()
+    ll.insert_at_beginning(30)
+    ll.insert_at_beginning(20)
+    ll.insert_at_beginning(10)
+    ll.display()  # Output: 10 -> 20 -> 30 -> NULL
+\`\`\`
+
+---
+
+### 5. Key Trade-offs: Arrays vs Linked Lists Comparison Table
+
+| Operation / Metric | Array / Dynamic List | Linked List |
+| :--- | :--- | :--- |
+| **Random Access (\`get(i)\`)** | O(1) constant time | O(n) sequential search |
+| **Insert at Beginning** | O(n) requires shifting all elements | O(1) only pointer updates |
+| **Insert at End** | O(1) amortized | O(n) unless tail pointer maintained (O(1)) |
+| **Memory Overhead** | Compact contiguous storage | Extra memory for pointer fields in each node |
+| **CPU Cache Locality** | Excellent (spatial cache prefetching) | Poor (scattered heap addresses cause cache misses) |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richLinkedListResponse);
+      return;
+    }
+
+    // 5. Queue Data Structure
+    if (/\b(queue|circular queue|priority queue|fifo|enqueue|dequeue)\b/i.test(promptLower)) {
+      const richQueueResponse = `### Conceptual Explanation: Queue Data Structure (FIFO)
+
+In university computer science for **${userStage}**, a **Queue** is an essential linear data structure operating under the **First-In, First-Out (FIFO)** ordering principle. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & Principles
+* A Queue functions like a real-world checkout queue: the first element added is the first one to be removed.
+* Has two primary access boundaries:
+  * **Rear (Tail):** Where new items are inserted via the **Enqueue** operation.
+  * **Front (Head):** Where items are extracted via the **Dequeue** operation.
+* Other essential helper operations include **Peek/Front** (view front item without deletion) and **isEmpty**.
+
+---
+
+### 2. Under the Hood: Types & Implementation Mechanics
+* **Linear Queue:** Can experience the 'false overflow' issue if implemented with a fixed array once pointers hit the array boundary.
+* **Circular Queue:** Solves false overflow by wrapping pointers back to index 0 using modulo arithmetic: \`rear = (rear + 1) % capacity\`.
+* **Priority Queue:** Elements are dequeued based on priority rather than arrival order, implemented using binary heaps in O(log n) time.
+* **Double-Ended Queue (Deque):** Allows push and pop operations at both the front and rear boundaries.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **CPU Scheduling:** Operating system ready-queues schedule waiting processes for execution.
+* **Print Spooling:** Print jobs are served in the exact order they were sent to the printer.
+* **Breadth-First Search (BFS):** Graph and tree level-order traversals strictly rely on queues to explore nearest neighbors first.
+* **Message Brokers:** Distributed streaming architectures (RabbitMQ, Apache Kafka, AWS SQS) are queue-driven.
+
+---
+
+### 4. Step-by-Step Code Example: Queue in Python
+\`\`\`python
+from collections import deque
+
+class TaskQueue:
+    def __init__(self):
+        # Uses double-ended queue internally for O(1) operations
+        self._queue = deque()
+
+    def enqueue(self, task_name: str):
+        # Enqueue task at rear: O(1)
+        self._queue.append(task_name)
+        print(f"Enqueued: {task_name}")
+
+    def dequeue(self) -> str:
+        # Dequeue task from front: O(1)
+        if not self._queue:
+            raise IndexError("Queue is empty")
+        task = self._queue.popleft()
+        print(f"Dequeued: {task}")
+        return task
+
+    def peek(self) -> str:
+        return self._queue[0] if self._queue else None
+
+if __name__ == '__main__':
+    q = TaskQueue()
+    q.enqueue("Render UI")
+    q.enqueue("Fetch API Data")
+    q.dequeue()  # Removes 'Render UI' (First-In, First-Out)
+    print("Next in line:", q.peek())  # 'Fetch API Data'
+\`\`\`
+
+---
+
+### 5. Key Trade-offs & Summary Comparison Table
+
+| Metric | Queue Advantage (+) | Engineering Consideration (-) |
+| :--- | :--- | :--- |
+| **Fairness & Ordering** | Guarantees strictly fair chronological processing without starvation. | Cannot access elements in the middle without dequeuing predecessors. |
+| **Time Complexity** | Both Enqueue and Dequeue execute in guaranteed O(1) constant time. | Array-based queues require circular modulo arithmetic or dynamic resizing. |
+| **Concurrency** | Thread-safe queues (\`BlockingQueue\`) streamline producer-consumer synchronization. | Bounded queues risk backpressure or memory exhaustion under heavy load. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richQueueResponse);
+      return;
+    }
+
+    // 6. Stack Data Structure
+    if (/\b(stack|lifo|push and pop|call stack|stack overflow)\b/i.test(promptLower) && !/\b(full stack)\b/i.test(promptLower)) {
+      const richStackResponse = `### Conceptual Explanation: Stack Data Structure (LIFO)
+
+In university computer science for **${userStage}**, a **Stack** is a linear collection governed by the **Last-In, First-Out (LIFO)** ordering principle. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & Principle
+* A Stack is a linear data structure where all insertions and deletions occur exclusively at a single end called the **Top**.
+* Think of a vertical stack of plates: the last plate placed on top is the first plate you pick up.
+* Core Operations:
+  * **Push:** Places a new element onto the top of the stack (O(1)).
+  * **Pop:** Removes and returns the current top element (O(1)).
+  * **Peek / Top:** Inspects the top element without removing it (O(1)).
+
+---
+
+### 2. Under the Hood: Call Stacks & Memory Architecture
+* **System Call Stack:** Every executing program utilizes a hardware-level call stack. When a function is invoked, an Activation Record (Stack Frame) containing return addresses, parameters, and local variables is pushed. When the function returns, its frame is popped.
+* **Stack Overflow:** Occurs when excessive function nesting (such as unbounded recursion) exceeds allocated stack memory limits.
+* **Auxiliary Implementations:** Can be constructed via dynamic arrays (amortized O(1) append) or singly linked lists (O(1) head insertion).
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Expression Evaluation & Syntax Parsing:** Evaluating postfix/prefix notations and validating balanced brackets in compilers.
+* **Browser Navigation:** The 'Back' button pushes visited URLs onto a stack and pops them upon backward navigation.
+* **Depth-First Search (DFS):** Graph and tree backtracking algorithms use stacks (either iteratively or via the call stack).
+
+---
+
+### 4. Step-by-Step Code Example: Balanced Parentheses Validation
+\`\`\`python
+def is_parentheses_balanced(expression: str) -> bool:
+    stack = []
+    mapping = {')': '(', ']': '[', '}': '{'}
+
+    for char in expression:
+        if char in mapping.values():
+            stack.append(char)  # Push opening bracket
+        elif char in mapping:
+            if not stack or stack[-1] != mapping[char]:
+                return False
+            stack.pop()  # Pop matched opening bracket
+
+    return len(stack) == 0
+
+print("Balanced '({[]})':", is_parentheses_balanced("({[]})"))  # True
+print("Unbalanced '([)]':", is_parentheses_balanced("([)]"))    # False
+\`\`\`
+
+---
+
+### 5. Key Trade-offs & Summary Comparison Table
+
+| Metric | Stack Advantage (+) | Engineering Consideration (-) |
+| :--- | :--- | :--- |
+| **Deterministic State** | Pure LIFO order guarantees predictable reversal and backtracking. | No random index access; to inspect bottom item, all items above must be popped. |
+| **Performance** | Push, Pop, and Peek operate in ultra-fast O(1) constant time. | Fixed-capacity arrays can cause Stack Overflow errors. |
+| **Simplicity** | Minimal code footprint and memory overhead per element. | Deep recursive call stacks can consume megabytes of virtual memory. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richStackResponse);
+      return;
+    }
+
+    // 7. Trees & BST
+    if (/\b(tree|binary tree|bst|binary search tree|avl tree|heap tree)\b/i.test(promptLower)) {
+      const richTreeResponse = `### Conceptual Explanation: Trees & Binary Search Trees (BST)
+
+In university computer science for **${userStage}**, **Trees** are non-linear, hierarchical data structures composed of interconnected nodes. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & Hierarchy
+* A **Tree** consists of a designated **Root node** connected to zero or more child nodes via directed edges.
+* Key Terminology: **Parent**, **Child**, **Leaf node** (node with no children), **Depth** (edges from root), and **Height** (longest path to a leaf).
+* A **Binary Tree** restricts every node to at most two children: designated as \`left\` and \`right\`.
+
+---
+
+### 2. The Binary Search Tree (BST) Property
+* A Binary Tree is a **Binary Search Tree (BST)** if and only if for every node N:
+  * All values in the **Left Subtree** are strictly less than N.data (left < N).
+  * All values in the **Right Subtree** are strictly greater than N.data (right > N).
+* **In-Order Traversal (Left -> Root -> Right):** Always yields elements in sorted ascending order.
+* **Time Complexity:** Average search, insert, and delete operations take **O(log n)** time. However, if elements are inserted in sorted order, the BST degenerates into a skewed linked list with **O(n)** worst-case complexity.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Database Indexing:** Self-balancing B-Trees and B+ Trees index billions of rows in relational databases (PostgreSQL, MySQL).
+* **Compilers & Interpreters:** Abstract Syntax Trees (ASTs) represent parsed grammar and expressions.
+* **File Systems:** Hierarchical folder and directory structures in Linux (ext4) and Windows (NTFS).
+* **Priority Queues:** Binary Heaps power Dijkstra's shortest path and task schedulers.
+
+---
+
+### 4. Step-by-Step Code Example: BST Insert & In-Order Traversal
+\`\`\`python
+class TreeNode:
+    def __init__(self, val: int):
+        self.val = val
+        self.left = None
+        self.right = None
+
+class BinarySearchTree:
+    def __init__(self):
+        self.root = None
+
+    def insert(self, val: int):
+        self.root = self._insert_node(self.root, val)
+
+    def _insert_node(self, node: TreeNode, val: int) -> TreeNode:
+        if not node:
+            return TreeNode(val)
+        if val < node.val:
+            node.left = self._insert_node(node.left, val)
+        elif val > node.val:
+            node.right = self._insert_node(node.right, val)
+        return node
+
+    def inorder(self, node: TreeNode, result: list):
+        if node:
+            self.inorder(node.left, result)
+            result.append(node.val)
+            self.inorder(node.right, result)
+
+bst = BinarySearchTree()
+for num in [50, 30, 70, 20, 40, 60, 80]:
+    bst.insert(num)
+sorted_elements = []
+bst.inorder(bst.root, sorted_elements)
+print('Sorted Elements from BST:', sorted_elements)
+# Output: [20, 30, 40, 50, 60, 70, 80]
+\`\`\`
+
+---
+
+### 5. Key Trade-offs: Balanced vs Unbalanced Trees
+
+| Tree Structure | Average Search | Worst-Case Search | Space Overhead | Self-Balancing Mechanism |
+| :--- | :--- | :--- | :--- | :--- |
+| **Standard BST** | O(log n) | O(n) (Skewed) | O(1) per node | None |
+| **AVL Tree** | O(log n) | O(log n) | Height balance factor | Tree Rotations (LL, RR, LR, RL) |
+| **Red-Black Tree** | O(log n) | O(log n) | 1 color bit per node | Color flips & rotations (used in C++ \`std::map\`, Java \`TreeMap\`) |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richTreeResponse);
+      return;
+    }
+
+    // 8. Searching & Sorting Algorithms
+    if (/\b(binary search|merge sort|quick sort|sorting|bubble sort|linear search|time complexity|big o)\b/i.test(promptLower)) {
+      const richSearchResponse = `### Conceptual Explanation: Algorithmic Efficiency & Binary Search
+
+In university **Algorithms** courses for **${userStage}**, **Binary Search** and sorting algorithms demonstrate algorithmic optimization and the divide-and-conquer paradigm. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & Principle of Binary Search
+* Binary Search is a divide-and-conquer algorithm designed to locate a target element in a **strictly sorted collection**.
+* Instead of scanning sequentially (O(n)), it repeatedly divides the search interval in half.
+* Time Complexity: **O(log2 n)**, meaning searching through 1,000,000 items takes at most 20 comparisons.
+
+---
+
+### 2. Under the Hood: Midpoint Invariants & Overflow Safety
+* **Search Window:** Bounded by pointers \`[low, high]\`.
+* **Safe Midpoint Formulation:** Rather than using \`(low + high) // 2\` (which can cause integer overflow in 32-bit C/Java), engineers calculate: \`mid = low + (high - low) // 2\`.
+* **Branch Decisions:**
+  * If \`arr[mid] == target\`: Found immediately.
+  * If \`arr[mid] < target\`: Target lies in right sub-array; set \`low = mid + 1\`.
+  * If \`arr[mid] > target\`: Target lies in left sub-array; set \`high = mid - 1\`.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Database B-Tree Page Lookup:** Finding record keys within individual page blocks.
+* **Git Bisect:** Finding the exact commit that introduced a software regression using binary search across commit history.
+* **Optimization Problems:** Finding thresholds via Binary Search on Answer.
+
+---
+
+### 4. Step-by-Step Code Example: Iterative Binary Search
+\`\`\`python
+def binary_search(arr: list, target: int) -> int:
+    low, high = 0, len(arr) - 1
+    while low <= high:
+        mid = low + (high - low) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+data = [3, 9, 14, 21, 33, 47, 59, 68, 72, 85, 99]
+index = binary_search(data, 47)
+print('Element 47 found at index:', index)  # Output: 5
+\`\`\`
+
+---
+
+### 5. Algorithm Comparison Table
+
+| Algorithm | Best Case | Average Case | Worst Case | Space Complexity | Stable? |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Binary Search** | O(1) | O(log n) | O(log n) | O(1) | N/A |
+| **Merge Sort** | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes |
+| **Quick Sort** | O(n log n) | O(n log n) | O(n^2) | O(log n) | No |
+| **Bubble Sort** | O(n) | O(n^2) | O(n^2) | O(1) | Yes |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richSearchResponse);
+      return;
+    }
+
+    // 9. Operating Systems
+    if (/\b(operating system|os|process|thread|deadlock|cpu scheduling|virtual memory|paging|semaphore|mutex)\b/i.test(promptLower)) {
+      const richOsResponse = `### Conceptual Explanation: Operating Systems Principles & Concurrency
+
+In university **Operating Systems (OS)** for **${userStage}**, the operating system acts as the primary hardware resource manager and execution environment. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition: Processes vs Threads
+* **Process:** An independent program in execution with its own isolated virtual address space, Process Control Block (PCB), open file handles, and memory maps.
+* **Thread:** A lightweight unit of execution within a process. Threads within the same process share code, global data, and heap memory, but possess independent program counters (PC) and call stacks.
+* **Context Switch:** The CPU hardware/kernel saving registers of an active task and restoring state for the next ready task.
+
+---
+
+### 2. The 4 Coffman Conditions for Deadlock
+A deadlock occurs in a concurrent system if and only if all four conditions hold simultaneously:
+1. **Mutual Exclusion:** Resources cannot be shared simultaneously.
+2. **Hold and Wait:** A process holds at least one resource while waiting to acquire additional occupied resources.
+3. **No Preemption:** Resources cannot be forcibly revoked from a holding process.
+4. **Circular Wait:** A closed chain of processes exists where each process waits for a resource held by the next (P0 -> P1 -> P0).
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **CPU Scheduling:** Preemptive schedulers (Round Robin, Multilevel Feedback Queue) ensure fair processor distribution across thousands of concurrent OS tasks.
+* **Virtual Memory & Paging:** Translates virtual page numbers (VPN) into physical frame numbers (PFN) via Memory Management Units (MMU) and Translation Lookaside Buffers (TLB).
+* **File Systems & Permissions:** Enforces access control lists (ACLs) and journaling for fault tolerance.
+
+---
+
+### 4. Step-by-Step Code Example: Thread Synchronization via Mutex
+\`\`\`python
+import threading
+
+shared_counter = 0
+mutex = threading.Lock()
+
+def safe_worker():
+    global shared_counter
+    for _ in range(10000):
+        # Critical Section guarded by Mutex to prevent race conditions
+        with mutex:
+            shared_counter += 1
+
+threads = [threading.Thread(target=safe_worker) for _ in range(5)]
+for t in threads: t.start()
+for t in threads: t.join()
+
+print('Synchronized Final Counter:', shared_counter)  # Guarantees exact 50000
+\`\`\`
+
+---
+
+### 5. Key Trade-offs: Processes vs Threads Comparison Table
+
+| Attribute | Process | Thread |
+| :--- | :--- | :--- |
+| **Memory Isolation** | Fully isolated; cannot corrupt other processes | Shared address space; bad pointer can crash entire process |
+| **Creation Overhead** | Heavyweight (allocates page tables, PCB, handles) | Lightweight (minimal stack allocation) |
+| **Context Switch Latency** | Slower (flushes TLB and CPU cache tags) | Ultra-fast (shares page tables; TLB remains valid) |
+| **Inter-Communication** | Requires IPC (Pipes, Sockets, Shared Memory) | Fast direct read/write to shared memory variables |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richOsResponse);
+      return;
+    }
+
+    // 10. Computer Networks
+    if (/\b(computer network|networking|osi model|tcp|udp|ip address|dns|http|https|socket)\b/i.test(promptLower)) {
+      const richNetResponse = `### Conceptual Explanation: Computer Networks & The 7-Layer OSI Model
+
+In university **Computer Networks** for **${userStage}**, networking protocols govern how disparate computer systems communicate reliably across physical and wireless media. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & The 7-Layer OSI Model
+The Open Systems Interconnection (OSI) framework standardizes network communication into 7 modular abstraction layers:
+1. **Application (Layer 7):** User applications & protocols (HTTP, HTTPS, DNS, SSH, SMTP).
+2. **Presentation (Layer 6):** Data serialization, encryption (TLS/SSL), compression.
+3. **Session (Layer 5):** Manages dialogues, connections, and authentication sessions.
+4. **Transport (Layer 4):** End-to-end data delivery, error recovery, flow control (**TCP, UDP**).
+5. **Network (Layer 3):** Logical addressing and packet routing across networks (**IP, ICMP, BGP**).
+6. **Data Link (Layer 2):** Framing, MAC addressing, hardware error detection (Ethernet, Wi-Fi).
+7. **Physical (Layer 1):** Raw transmission of electrical, optical, or radio bit streams.
+
+---
+
+### 2. Under the Hood: TCP 3-Way Handshake vs UDP
+* **Transmission Control Protocol (TCP):** Connection-oriented, reliable protocol.
+  * **SYN:** Client sends Synchronize sequence number.
+  * **SYN-ACK:** Server responds with Acknowledge and its own sequence number.
+  * **ACK:** Client confirms receipt; connection established.
+  * Provides congestion control, guaranteed packet ordering, and automatic retransmissions.
+* **User Datagram Protocol (UDP):** Connectionless, lightweight protocol with zero connection handshake. Packets (datagrams) are fire-and-forget, delivering minimal latency at the expense of dropped packet recovery.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Web Browsing & E-Commerce:** Powered by TCP and HTTP/2, HTTP/3 (QUIC over UDP).
+* **Real-Time Video Streaming & Gaming:** Zoom, Discord, and multiplayer games use UDP to prevent buffer lag caused by retransmissions.
+* **Domain Name System (DNS):** Rapid UDP queries translate human domain names (\`google.com\`) into IP addresses (\`142.250.190.46\`).
+
+---
+
+### 4. Step-by-Step Code Example: Python TCP Socket Server
+\`\`\`python
+import socket
+
+def start_tcp_echo_server():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(('127.0.0.1', 9999))
+    server_socket.listen(5)
+    print('TCP Server listening on 127.0.0.1:9999...')
+
+    client_conn, client_addr = server_socket.accept()
+    print(f'Accepted connection from: {client_addr}')
+    data = client_conn.recv(1024)
+    client_conn.sendall(b'HTTP/1.1 200 OK\\r\\nContent-Length: 12\\r\\n\\r\\nHello World!')
+    client_conn.close()
+    server_socket.close()
+\`\`\`
+
+---
+
+### 5. Key Trade-offs: TCP vs UDP Comparison Table
+
+| Metric | TCP (Transmission Control Protocol) | UDP (User Datagram Protocol) |
+| :--- | :--- | :--- |
+| **Reliability** | 100% Guaranteed; lost packets are retransmitted | No guarantee; dropped packets are discarded |
+| **Connection Setup** | Requires 3-way handshake prior to data exchange | Connectionless; sends packets immediately |
+| **Ordering** | In-order delivery guaranteed via sequence numbers | Packets may arrive out of order |
+| **Header Size** | 20 to 60 bytes | Lightweight 8 bytes |
+| **Best For** | File transfer, web browsing, emails, banking | Live audio/video streaming, DNS, online gaming |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richNetResponse);
+      return;
+    }
+
+    // 11. DBMS & Normalization
+    if (/\b(dbms|database|sql|normalization|1nf|2nf|3nf|bcnf|acid|transaction)\b/i.test(promptLower)) {
+      const richDbmsResponse = `### Conceptual Explanation: DBMS Normalization & Systems Architecture
+
+In relational database systems for **${userStage}**, **Database Normalization** is the formal mathematical technique of designing relational schemas to eliminate data redundancy and prevent update anomalies. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & The Normal Forms
+* Normalization systematically decomposes tables to isolate dependencies:
+  * **1NF (First Normal Form):** All attribute values must be atomic (no multi-valued lists), and each table must have a primary key.
+  * **2NF (Second Normal Form):** Satisfies 1NF and eliminates **partial functional dependencies**—every non-key column must depend on the *entire* primary key.
+  * **3NF (Third Normal Form):** Satisfies 2NF and eliminates **transitive dependencies** (X -> Y and Y -> Z). Non-key attributes must depend *only* on the candidate key.
+  * **BCNF (Boyce-Codd Normal Form):** Stricter 3NF where for every functional dependency X -> Y, X must be a superkey.
+
+---
+
+### 2. Under the Hood: Preventing The 3 Relational Anomalies
+Without proper normalization, denormalized composite tables cause serious database corruption:
+* **Insertion Anomaly:** Unable to record an independent entity (e.g. Course) without also creating an unrelated entity (e.g. Student Enrollment).
+* **Deletion Anomaly:** Deleting a student enrollment inadvertently deletes the entire course record from existence.
+* **Update Anomaly:** Updating an instructor's office room requires editing hundreds of duplicate rows; if one row fails, data becomes inconsistent.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Banking & Core Ledger Databases:** Rely strictly on 3NF/BCNF schemas and **ACID transactions** (Atomicity, Consistency, Isolation, Durability) to ensure zero monetary discrepancy.
+* **Healthcare & Enterprise ERP:** Modular schemas guarantee medical records and billing dependencies remain strictly separated.
+
+---
+
+### 4. Step-by-Step Code Example: Normalized Relational SQL Schema
 \`\`\`sql
--- 1. Entity Table: Students
+-- 1. Student Entity Table (1NF, 2NF, 3NF Compliant)
 CREATE TABLE students (
     student_id INT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL
 );
 
--- 2. Entity Table: Courses
+-- 2. Course Entity Table
 CREATE TABLE courses (
-    course_id VARCHAR(10) PRIMARY KEY,
+    course_code VARCHAR(10) PRIMARY KEY,
     title VARCHAR(120) NOT NULL,
     credits INT DEFAULT 4
 );
 
--- 3. Relationship Junction: Enrollments (Resolves M:N Cardinality)
+-- 3. Junction Table Resolving Many-to-Many Relationship
 CREATE TABLE enrollments (
     enrollment_id INT PRIMARY KEY,
     student_id INT NOT NULL REFERENCES students(student_id),
-    course_id VARCHAR(10) NOT NULL REFERENCES courses(course_id),
+    course_code VARCHAR(10) NOT NULL REFERENCES courses(course_code),
     grade VARCHAR(2),
-    CONSTRAINT unique_enrollment UNIQUE(student_id, course_id)
+    CONSTRAINT unique_enrollment UNIQUE(student_id, course_code)
 );
 \`\`\`
 
 ---
 
-### 4. Pros & Cons of Relational Normalization
+### 5. Key Trade-offs: Normalization vs Denormalization
 
-| Advantages (+) | Engineering Trade-offs (-) |
-| :--- | :--- |
-| **Zero Data Redundancy:** Attributes are stored in single authoritative records. | **JOIN Overhead:** Complex queries require multiple relational JOINs, impacting read latency. |
-| **Atomic Updates:** Modifications require touching only one row, maximizing ACID consistency. | **Schema Complexity:** Requires managing foreign key constraints and multiple tables. |
+| Attribute | Normalized Schema (3NF / BCNF) | Denormalized Schema (OLAP / Data Warehouse) |
+| :--- | :--- | :--- |
+| **Redundancy** | Zero duplicate data attributes | Intentional redundancy for read performance |
+| **Write Performance** | Ultra-fast single-row inserts and updates | Slower writes; requires updating multiple denormalized rows |
+| **Read Performance** | Requires relational \`JOIN\` operations across tables | Very fast reads; queries read from flat pre-joined tables |
+| **Best Used In** | OLTP transactional databases (PostgreSQL, MySQL) | Analytical data warehouses (Snowflake, BigQuery, ClickHouse) |
 
 ---
 
-💡 *General Knowledge Explanation • Tailored for ${userStage} DBMS Curriculum*`;
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
 
       sendRichTutorMessage(richDbmsResponse);
       return;
     }
 
-    // 4. Universal Structured 4-Section Academic Explanation for ANY other topic
+    // 12. Web Development & JavaScript / React
+    if (/\b(javascript|js|html|css|react|dom|frontend|web development)\b/i.test(promptLower)) {
+      const richWebResponse = `### Conceptual Explanation: Web Architecture, DOM & Modern Frontend
+
+In university courses on **Web Technologies** for **${userStage}**, web applications operate across client-side rendering engines and server-side protocol pipelines. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition: The Modern Web Stack
+* **HTML (HyperText Markup Language):** Provides semantic structure and content hierarchy to web documents.
+* **CSS (Cascading Style Sheets):** Governs visual presentation, responsive layouts (Flexbox, CSS Grid), and animations.
+* **JavaScript (ECMAScript):** Single-threaded, event-driven scripting language providing interactivity, state management, and asynchronous network requests.
+
+---
+
+### 2. Under the Hood: The Browser Event Loop & Virtual DOM
+* **DOM (Document Object Model):** The tree-structured in-memory representation of an HTML document constructed by the browser engine (Blink, Gecko, WebKit).
+* **The Event Loop:** JavaScript handles non-blocking asynchronous I/O via a Call Stack, Web APIs, Microtask Queue (Promises), and Macrotask Queue (\`setTimeout\`, DOM events).
+* **Virtual DOM (React):** A lightweight in-memory snapshot of the real DOM. When state changes, a diffing algorithm (Reconciliation) computes minimal changes and applies them in batch to prevent expensive browser reflows.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Single Page Applications (SPAs):** React, Next.js, and Vue deliver seamless desktop-like app experiences without full page reloads.
+* **REST & GraphQL APIs:** Frontends communicate with microservices via JSON payloads across HTTP/HTTPS.
+* **Progressive Web Apps (PWAs):** Service workers cache assets for offline capability and native device access.
+
+---
+
+### 4. Step-by-Step Code Example: Modern Asynchronous Fetch & State
+\`\`\`javascript
+async function fetchUserCourses(studentId) {
+    try {
+        const response = await fetch(\`/api/students/\${studentId}/courses\`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(\`HTTP Error: \${response.status}\`);
+        }
+
+        const courses = await response.json();
+        console.log(\`Fetched \${courses.length} registered courses:\`, courses);
+        return courses;
+    } catch (error) {
+        console.error('Failed to load student courses:', error.message);
+        return [];
+    }
+}
+\`\`\`
+
+---
+
+### 5. Key Trade-offs & Summary Comparison Table
+
+| Rendering Strategy | Client-Side Rendering (CSR / React) | Server-Side Rendering (SSR / Next.js) |
+| :--- | :--- | :--- |
+| **Initial Page Load** | Slower (requires downloading & executing JavaScript bundle) | Ultra-fast (server returns pre-rendered HTML) |
+| **Subsequent Navigation** | Instantaneous; renders locally without page reload | Fast; hydrates components on demand |
+| **SEO Optimization** | Challenging for crawlers that don't execute JS | Optimal; search engine spiders read raw HTML |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richWebResponse);
+      return;
+    }
+
+    // 13. Machine Learning & AI
+    if (/\b(machine learning|deep learning|neural network|relu|activation function|backpropagation|gradient descent|transformer|cnn|ai)\b/i.test(promptLower)) {
+      const richMlResponse = `### Conceptual Explanation: Machine Learning & Artificial Intelligence
+
+In university computer science for **${userStage}**, **Machine Learning (ML)** is the study of computational algorithms that improve automatically through empirical data experience without explicit rule-based programming. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & The 3 Main Paradigms
+* **Supervised Learning:** Models learn a mapping function from labeled input-output pairs (X, y) (e.g. Linear Regression, Random Forests, Neural Networks).
+* **Unsupervised Learning:** Algorithms uncover latent patterns or groupings in unlabelled data (e.g. K-Means Clustering, PCA).
+* **Reinforcement Learning:** Agents learn optimal policies by interacting with an environment, maximizing cumulative rewards.
+
+---
+
+### 2. Under the Hood: Loss Functions & Gradient Descent
+* **Loss Function L(θ):** Quantifies the mathematical error between model predictions and ground-truth values (e.g. Mean Squared Error, Cross-Entropy).
+* **Gradient Descent:** The fundamental optimization algorithm that updates model weights by computing partial derivatives of the loss function: \`θ = θ - η * ∇L(θ)\` where η is the learning rate.
+* **Backpropagation:** Uses the chain rule of calculus to propagate errors backward through neural network layers to update weights efficiently.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **Computer Vision:** Convolutional Neural Networks (CNNs) for medical imaging, autonomous vehicle perception, and facial recognition.
+* **Natural Language Processing (NLP):** Transformer architectures (BERT, GPT, Gemini) powering conversational agents and translation.
+* **Recommendation Engines:** Matrix factorization and collaborative filtering powering Netflix, YouTube, and Amazon feeds.
+
+---
+
+### 4. Step-by-Step Code Example: Linear Regression with Gradient Descent
+\`\`\`python
+import numpy as np
+
+# Synthetic Training Data: y = 2x + 1
+X = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+y = np.array([3.0, 5.0, 7.0, 9.0, 11.0])
+
+# Initialize Parameters
+w, b = 0.0, 0.0
+learning_rate = 0.05
+epochs = 200
+
+for epoch in range(epochs):
+    y_pred = w * X + b
+    dw = (-2 / len(X)) * np.sum(X * (y - y_pred))
+    db = (-2 / len(X)) * np.sum(y - y_pred)
+    w -= learning_rate * dw
+    b -= learning_rate * db
+
+print(f'Learned Weight: {w:.2f} (Ideal: 2.0)')
+print(f'Learned Bias: {b:.2f} (Ideal: 1.0)')
+\`\`\`
+
+---
+
+### 5. Key Trade-offs: Bias vs Variance in Machine Learning
+
+| Concept | High Bias (Underfitting) | High Variance (Overfitting) | Optimal Balance |
+| :--- | :--- | :--- | :--- |
+| **Model Complexity** | Overly simplistic model | Excessively complex model (memorizes noise) | Captures true underlying distribution |
+| **Training Error** | High | Low | Low |
+| **Testing / Generalization** | High | High | Minimal generalization error |
+| **Remedy** | Use more expressive features | Regularization (L1/L2), Dropout, or more data | Cross-validation tuning |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richMlResponse);
+      return;
+    }
+
+    // 14. Python Specific
+    if (/\b(python|cpython|gil|list comprehension|lambda in python)\b/i.test(promptLower)) {
+      const richPythonResponse = `### Conceptual Explanation: Python in Data Structures & Systems
+
+For students in **${userStage}**, **Python** is a high-level, dynamically typed language created by Guido van Rossum, prized for rapid prototyping, data science, and clean algorithmic problem-solving. Here is a 5-point explanation:
+
+---
+
+### 1. Core Definition & Characteristics
+* Python is an **interpreted, multi-paradigm, dynamically typed language** where variables are bound to objects at runtime.
+* It features automatic memory management via reference counting and a cyclic generational garbage collector.
+* Emphasizes clean readability ('The Zen of Python'), enabling algorithms to be expressed in concise mathematical notation.
+
+---
+
+### 2. Under the Hood: CPython Memory Model & The GIL
+* **CPython Implementation:** The standard Python engine is written in C. Every variable is a pointer to a \`PyObject\` structure.
+* **Lists vs Arrays:** A Python \`list\` is a dynamically resizing array of pointers to \`PyObject\` items, allowing heterogeneous types but introducing pointer indirection overhead.
+* **Global Interpreter Lock (GIL):** A mutex in CPython that ensures only one native thread executes Python bytecode at a time, protecting memory consistency.
+
+---
+
+### 3. Practical Applications & Industry Usage
+* **AI, Machine Learning & Deep Learning:** TensorFlow, PyTorch, Scikit-Learn, and HuggingFace ecosystems.
+* **Data Science & Analytics:** NumPy, Pandas, Matplotlib, SciPy for numerical analysis.
+* **Web Backend & Automation:** FastAPI, Django, Flask, and automated scripting across cloud systems.
+
+---
+
+### 4. Step-by-Step Code Example: Clean Data Structure Implementation
+\`\`\`python
+class Stack:
+    def __init__(self):
+        self._data = []
+
+    def push(self, element):
+        # Append element: O(1) amortized time
+        self._data.append(element)
+
+    def pop(self):
+        # Remove top element: O(1) time
+        if self.is_empty():
+            raise IndexError('pop from empty stack')
+        return self._data.pop()
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError('peek from empty stack')
+        return self._data[-1]
+
+    def is_empty(self):
+        return len(self._data) == 0
+
+    def size(self):
+        return len(self._data)
+
+if __name__ == '__main__':
+    st = Stack()
+    for item in [10, 20, 30]:
+        st.push(item)
+    print('Stack Top:', st.peek())  # 30
+    print('Popped:', st.pop())       # 30
+    print('Remaining Size:', st.size())  # 2
+\`\`\`
+
+---
+
+### 5. Key Trade-offs & Summary Comparison Table
+
+| Metric | Python Advantage (+) | Engineering Constraint (-) |
+| :--- | :--- | :--- |
+| **Development Speed** | 3-5x faster prototyping than C++ or Java; expressive standard library. | Slower execution in CPU-bound loops compared to compiled languages. |
+| **Ecosystem** | World's premier ecosystem for Artificial Intelligence and Machine Learning. | High per-object memory overhead due to \`PyObject\` metadata. |
+| **Syntax Simplicity** | Intuitive indentation-based syntax reduces boilerplate bugs. | Dynamic typing can allow type-related errors to slip to runtime. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richPythonResponse);
+      return;
+    }
+
+    // 15. Universal Topic Explainer for ANY other topic (Structured in 5 distinct points)
     const cleanTopic = studentPrompt
       .replace(/^(what is|explain|define|how does|why is|tell me about|kya hota hai|kya hai|samjhao)\s+/i, '')
       .replace(/\?+$/, '')
@@ -1536,62 +2355,46 @@ CREATE TABLE enrollments (
 
     const universalRichResponse = `### Conceptual Explanation: ${topicTitle}
 
-Since you are studying at the **${userStage}** level in **${activeSubject || 'Computer Science & Engineering'}**, let's examine **${topicTitle}** thoroughly from core principles to practical application.
+For students in **${userStage}**, here is a comprehensive, structured 5-point explanation of **${topicTitle}**:
 
 ---
 
-### 1. Key Characteristics & Core Principles
-
-* **Formal Definition:** **${topicTitle}** represents an essential theoretical and applied concept in ${activeSubject || 'this domain'}.
-* **Primary Objective:** It establishes systematic rules and structured workflows to solve computational and analytical challenges efficiently.
-* **Invariants & Guarantees:** Operates under well-defined mathematical or logical rules to ensure consistent behavior across inputs.
-* **Curriculum Relevance for ${userStage}:** Understanding the underlying principles prepares you directly for university evaluations, coding assessments, and system design.
+### 1. Core Definition & Foundational Principles
+* **Formal Definition:** **${topicTitle}** represents a fundamental concept that establishes systematic principles and rules to solve core problems in this domain.
+* **Primary Objective:** It structures complex workflows or systems into modular, reproducible components.
+* **Theoretical Invariants:** Operates under well-defined logical and physical constraints, ensuring consistent behavior across diverse scenarios.
 
 ---
 
-### 2. Under the Hood & Systems Working Mechanism
-
-1. **Input Representation:** Problem parameters are systematically framed into defined data structures or mathematical variables.
-2. **State Transition & Processing:** Operations execute step-by-step according to formal algorithms, preserving system invariants.
-3. **Complexity & Efficiency:** Time and memory resource complexities remain strictly bounded, preventing performance bottlenecks in production.
-
----
-
-### 3. Practical Implementation & Code Example
-
-Here is a practical, runnable demonstration illustrating the core principles of **${topicTitle}**:
-
-\`\`\`python
-# Pedagogical demonstration of ${topicTitle} for ${userStage}
-class ${topicTitle.replace(/[^a-zA-Z0-9]/g, '') || 'Solution'}:
-    def __init__(self, name: str = "${topicTitle}"):
-        self.name = name
-        self.is_active = True
-
-    def process(self, input_data):
-        """
-        Executes core transformation logic.
-        Time Complexity: O(n) | Space Complexity: O(1)
-        """
-        if not self.is_active:
-            raise RuntimeError("Engine not active")
-        return [f"processed_{item}" for item in input_data]
-
-# --- Driver Code ---
-if __name__ == '__main__':
-    demo = ${topicTitle.replace(/[^a-zA-Z0-9]/g, '') || 'Solution'}()
-    sample_inputs = ["input_A", "input_B", "input_C"]
-    print("Execution Result:", demo.process(sample_inputs))
-\`\`\`
+### 2. Working Mechanism & Operational Flow
+1. **Input & Preconditions:** The system captures necessary parameters, state variables, or initial conditions.
+2. **State Transition & Processing:** Executes defined operational logic or algorithms, transforming input while preserving system invariants.
+3. **Output & Verification:** Generates deterministic output or state changes with bounded resource utilization and efficiency.
 
 ---
 
-### 4. Pros, Cons & Engineering Trade-offs
+### 3. Real-World Applications & Industry Relevance
+* Widely applied across modern engineering, scientific research, and real-world implementations involving **${topicTitle}**.
+* Forms a key evaluation topic in university exams, technical interviews, and system architecture reviews.
+* Solves scalability and organizational challenges by isolating responsibilities into clean, maintainable units.
 
-| Advantages (+) | Engineering Constraints (-) |
-| :--- | :--- |
-| **Conceptual Clarity:** Establishes predictable, deterministic behavior across all standard use-cases. | **Upfront Design Overhead:** Requires structured architecture and validation logic. |
-| **Resource Efficiency:** Minimizes redundant computation and optimizes throughput when implemented properly. | **Edge-Case Sensitivity:** Extreme input boundaries require explicit defensive guards. |
+---
+
+### 4. Practical Demonstration & Step-by-Step Breakdown
+Understanding **${topicTitle}** requires analyzing how it handles inputs and processes them sequentially:
+* **Step 1 (Initialization):** Define the system boundaries and verify that all prerequisites are satisfied.
+* **Step 2 (Execution):** Step through the core logic, monitoring state transformations and invariants.
+* **Step 3 (Evaluation):** Measure efficiency against alternative approaches to verify optimal performance.
+
+---
+
+### 5. Summary Evaluation & Key Takeaways
+
+| Dimension | Primary Advantage (+) | Critical Consideration (-) |
+| :--- | :--- | :--- |
+| **Systematic Structure** | Delivers predictable, verifiable outcomes across standard cases. | Requires disciplined design upfront and boundary checks. |
+| **Operational Efficiency** | Minimizes computational or resource waste when implemented correctly. | Edge cases and extreme input sizes require defensive error guards. |
+| **Maintainability** | Clean separation of concerns simplifies troubleshooting and maintenance. | Abstraction layers must be carefully chosen to avoid unnecessary overhead. |
 
 ---
 

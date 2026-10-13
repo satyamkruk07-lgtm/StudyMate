@@ -562,7 +562,7 @@ def ask_tutor(req: AskRequest, user: Optional[Dict[str, Any]] = Depends(get_curr
             "message": str(e)
         }
 
-    # CRITICAL: Always provide a reliable, high-yield ~5-line concise answer if external API is slow or unavailable
+    # CRITICAL: Always provide a reliable, high-yield structured answer if external API is slow or unavailable
     if not ai_result or not ai_result.get("success"):
         fallback_answer = synthesize_concise_5_line_answer(
             question=query,
@@ -570,13 +570,13 @@ def ask_tutor(req: AskRequest, user: Optional[Dict[str, Any]] = Depends(get_curr
             grade_or_course=grade_course,
             subject=target_subject,
             preferred_language=lang,
-            context_chunks=matched_chunks
+            context_chunks=matched_chunks if has_sufficient else None
         )
         ai_result = {
             "success": True,
             "answer": fallback_answer,
-            "is_grounded": bool(matched_chunks),
-            "mode": "source_grounded" if matched_chunks else "general_ai"
+            "is_grounded": bool(matched_chunks and has_sufficient),
+            "mode": "source_grounded" if (matched_chunks and has_sufficient) else "general_ai"
         }
 
     citations = []
