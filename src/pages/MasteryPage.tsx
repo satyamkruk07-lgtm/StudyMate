@@ -134,9 +134,9 @@ export const MasteryPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner explaining Bayesian Model & Data Status */}
-      <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 rounded-2xl bg-[#0a0e17] border border-teal-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 text-xs text-slate-300">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0" />
+          <Info className="w-4 h-4 text-teal-400 shrink-0" />
           <span>
             {isUsingBackend ? (
               <>
@@ -144,7 +144,7 @@ export const MasteryPage: React.FC = () => {
               </>
             ) : (
               <>
-                <strong className="text-sky-300">Live Bayesian Tracking Ready:</strong> Complete an adaptive quiz to initialize live Bayesian Beta-Binomial tracking on your course materials.
+                <strong className="text-teal-300">Live Bayesian Tracking Ready:</strong> Complete an adaptive quiz to initialize live Bayesian Beta-Binomial tracking on your course materials.
               </>
             )}
           </span>
@@ -163,22 +163,22 @@ export const MasteryPage: React.FC = () => {
       {/* Summary stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Overall Mastery Gauge Card */}
-        <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-sm space-y-3">
+        <div className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
               Mean Topic Mastery
             </span>
-            <Award className="w-4 h-4 text-indigo-400" />
+            <Award className="w-4 h-4 text-teal-400" />
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-extrabold text-white font-mono">{avgMastery}%</span>
-            <span className="text-xs text-emerald-400 font-semibold font-mono">
+            <span className="text-xs text-teal-400 font-semibold font-mono">
               {isUsingBackend ? 'Bayesian Expected Mean' : '+6.5% benchmark'}
             </span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800/80">
             <div
-              className="bg-gradient-to-r from-indigo-500 to-sky-400 h-2 rounded-full"
+              className="bg-gradient-to-r from-teal-500 to-emerald-400 h-2 rounded-full"
               style={{ width: `${avgMastery}%` }}
             />
           </div>
@@ -188,12 +188,12 @@ export const MasteryPage: React.FC = () => {
         </div>
 
         {/* Strong Topics */}
-        <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-sm space-y-3">
+        <div className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
               Strong Topics (≥ 75%)
             </span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-teal-400" />
           </div>
           <div className="text-3xl font-extrabold text-white font-mono">
             {strongTopics.length} <span className="text-base text-slate-500 font-normal">/ {displayTopics.length}</span>
@@ -203,7 +203,7 @@ export const MasteryPage: React.FC = () => {
               strongTopics.slice(0, 3).map(t => (
                 <span
                   key={t.id}
-                  className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20"
                 >
                   {t.topicName}
                 </span>
@@ -215,9 +215,9 @@ export const MasteryPage: React.FC = () => {
         </div>
 
         {/* Weak Topics Alert */}
-        <div className="p-5 rounded-2xl bg-[#0f172a] border border-rose-500/30 shadow-sm space-y-3">
+        <div className="p-5 rounded-2xl bg-[#0a0e17] border border-rose-500/20 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-rose-400 uppercase tracking-wider">
               Weak Topics (&lt; 60%)
             </span>
             <AlertTriangle className="w-4 h-4 text-rose-400" />
@@ -244,10 +244,10 @@ export const MasteryPage: React.FC = () => {
 
       {/* Real Personalized Recommendations from Backend */}
       {backendRecommendations && backendRecommendations.length > 0 && (
-        <div className="p-5 rounded-2xl bg-[#0f172a] border border-indigo-500/30 space-y-3">
+        <div className="p-5 rounded-2xl bg-[#0a0e17] border border-teal-500/20 space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <Sparkles className="w-4 h-4 text-teal-400" />
               <h3 className="font-bold text-sm text-white">History-Grounded Personalized Recommendations</h3>
             </div>
             <span className="text-xs text-slate-400">Generated from measured assessment logs</span>
@@ -257,19 +257,19 @@ export const MasteryPage: React.FC = () => {
             {backendRecommendations.map(rec => (
               <div
                 key={rec.id}
-                className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between gap-3"
+                className="p-4 rounded-xl bg-[#070b12] border border-slate-800 flex flex-col justify-between gap-3"
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-xs text-white flex items-center gap-1.5">
-                      <Compass className="w-3.5 h-3.5 text-sky-400" />
+                      <Compass className="w-3.5 h-3.5 text-teal-400" />
                       {rec.title}
                     </span>
                     <span
                       className={`text-[10px] font-mono px-2 py-0.5 rounded font-semibold ${
                         rec.priority === 'high'
                           ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                          : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                          : 'bg-teal-500/15 text-teal-300 border border-teal-500/30'
                       }`}
                     >
                       {rec.priority.toUpperCase()} PRIORITY
@@ -292,7 +292,7 @@ export const MasteryPage: React.FC = () => {
                         difficulty: rec.recommended_difficulty
                       })
                     }
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shrink-0 shadow-sm"
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 shrink-0 shadow-sm"
                   >
                     Start Session →
                   </button>
@@ -304,8 +304,8 @@ export const MasteryPage: React.FC = () => {
       )}
 
       {/* Topic-Wise Progress Table & Visualizer */}
-      <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
           <div>
             <h3 className="font-bold text-base text-white tracking-tight">Topic Competency Breakdown</h3>
             <p className="text-xs text-slate-400">
@@ -321,7 +321,7 @@ export const MasteryPage: React.FC = () => {
                 onClick={() => setFilterStatus(f)}
                 className={`px-2.5 py-1 text-xs rounded-lg font-medium capitalize transition-colors ${
                   filterStatus === f
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-teal-500 text-slate-950 font-semibold'
                     : 'bg-slate-900 text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -339,7 +339,7 @@ export const MasteryPage: React.FC = () => {
               onClick={() => setSelectedSubjectFilter('all')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                 selectedSubjectFilter === 'all'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-teal-500 text-slate-950 font-semibold'
                   : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
@@ -351,7 +351,7 @@ export const MasteryPage: React.FC = () => {
                 onClick={() => setSelectedSubjectFilter(selectedSubjectFilter === s ? 'all' : s)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 ${
                   selectedSubjectFilter === s
-                    ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white'
+                    ? 'bg-teal-500 text-slate-950 font-semibold shadow-sm shadow-teal-500/20'
                     : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
                 }`}
               >
@@ -364,14 +364,14 @@ export const MasteryPage: React.FC = () => {
         {/* List of topic progress bars */}
         <div className="space-y-3.5">
           {filteredTopics.length === 0 ? (
-            <div className="text-center py-10 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-500">
+            <div className="text-center py-10 rounded-xl bg-[#070b12] border border-slate-800 text-xs text-slate-500">
               No topics assessed yet. Upload learning materials and take an adaptive quiz to begin calibration.
             </div>
           ) : (
             filteredTopics.map(topic => (
             <div
               key={topic.id}
-              className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all space-y-2.5"
+              className="p-4 rounded-xl bg-[#070b12] border border-slate-800 hover:border-slate-700 transition-all space-y-2.5"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
@@ -383,14 +383,14 @@ export const MasteryPage: React.FC = () => {
                         ? 'bg-rose-400'
                         : topic.status === 'insufficient_history'
                         ? 'bg-slate-500'
-                        : 'bg-sky-400'
+                        : 'bg-teal-400'
                     }`}
                   />
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-sm text-slate-100">{topic.topicName}</h4>
                       {topic.isLive && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-teal-500/10 text-teal-300 border border-teal-500/20">
                           Beta({topic.alpha}, {topic.beta})
                         </span>
                       )}
@@ -409,7 +409,7 @@ export const MasteryPage: React.FC = () => {
                         topic: topic.topicName
                       })
                     }
-                    className="p-1.5 text-indigo-400 hover:text-indigo-300 hover:bg-slate-800 rounded-lg transition-colors"
+                    className="p-1.5 text-teal-400 hover:text-teal-300 hover:bg-slate-800 rounded-lg transition-colors"
                     title="Quiz on this topic"
                   >
                     <BrainCircuit className="w-4 h-4" />
@@ -427,7 +427,7 @@ export const MasteryPage: React.FC = () => {
                       ? 'bg-gradient-to-r from-rose-500 to-amber-500'
                       : topic.status === 'insufficient_history'
                       ? 'bg-slate-600'
-                      : 'bg-gradient-to-r from-sky-500 to-indigo-400'
+                      : 'bg-gradient-to-r from-teal-500 to-emerald-400'
                   }`}
                   style={{ width: `${topic.masteryPercentage}%` }}
                 />
@@ -443,13 +443,13 @@ export const MasteryPage: React.FC = () => {
       </div>
 
       {/* Learning & Quiz Attempt History */}
-      <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-indigo-400" />
+            <Clock className="w-4 h-4 text-teal-400" />
             <h3 className="font-bold text-base text-white tracking-tight">Quiz & Assessment History</h3>
           </div>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 font-mono">
             {backendAttempts.length || quizAttempts.length} Total Sessions Recorded
           </span>
         </div>
@@ -463,12 +463,12 @@ export const MasteryPage: React.FC = () => {
             (backendAttempts.length > 0 ? backendAttempts : quizAttempts).map((att: any) => (
               <div
                 key={att.attempt_id || att.id}
-                className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 rounded-xl bg-[#070b12] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-200">{att.topic}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 font-mono">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-900 text-slate-400 font-mono border border-slate-800">
                       {att.difficulty}
                     </span>
                     <span className="text-[11px] text-slate-400 font-mono">
@@ -484,7 +484,7 @@ export const MasteryPage: React.FC = () => {
                 <div className="flex items-center gap-4 self-end sm:self-auto">
                   <span
                     className={`font-mono text-base font-extrabold ${
-                      (att.score_percentage ?? att.scorePercentage) >= 70 ? 'text-emerald-400' : 'text-amber-400'
+                      (att.score_percentage ?? att.scorePercentage) >= 70 ? 'text-teal-400' : 'text-amber-400'
                     }`}
                   >
                     {att.score_percentage ?? att.scorePercentage}%
@@ -497,7 +497,7 @@ export const MasteryPage: React.FC = () => {
                         difficulty: att.difficulty
                       })
                     }
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-500/10 text-teal-300 border border-teal-500/30 hover:bg-teal-500 hover:text-slate-950 transition-all"
                   >
                     <span>Retake</span>
                     <RotateCcw className="w-3 h-3" />

@@ -77,20 +77,20 @@ export const TutorPage: React.FC = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] max-w-5xl mx-auto pb-4">
       {/* Top Header bar with status badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-[#0f172a] border border-slate-800 shrink-0 mb-3 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-[#0a0e17] border border-slate-800/80 shrink-0 mb-3 gap-3">
         <div className="flex items-center gap-3">
-          <div className="relative p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400">
+          <div className="relative p-2.5 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
             <Bot className="w-5 h-5" />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#0f172a]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-teal-400 rounded-full border-2 border-[#0a0e17]" />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-bold text-white tracking-tight">Adaptive AI Tutor</h2>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-emerald-400" /> Auto Mode (Default)
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-teal-400" /> Auto Mode (Default)
               </span>
               {profile && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">
                   {profile.education_level === 'school'
                     ? `${profile.grade_or_course} (${profile.board_or_specialization || 'CBSE'})`
                     : profile.education_level === 'college'
@@ -100,7 +100,7 @@ export const TutorPage: React.FC = () => {
               )}
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Auto-retrieves uploaded course materials when available, or provides leveled explanations via general AI knowledge.
+              Auto-retrieves uploaded course materials when available, or provides leveled explanations via calibrated AI knowledge.
             </p>
           </div>
         </div>
@@ -108,7 +108,7 @@ export const TutorPage: React.FC = () => {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             onClick={clearChat}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition-colors"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition-colors"
           >
             Reset Session
           </button>
@@ -123,8 +123,8 @@ export const TutorPage: React.FC = () => {
             onClick={() => setActiveSubject(null)}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-all ${
               activeSubject === null
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                ? 'bg-teal-500 text-slate-950 font-semibold'
+                : 'bg-[#0a0e17] text-slate-400 hover:text-white border border-slate-800'
             }`}
           >
             All Subjects
@@ -137,8 +137,8 @@ export const TutorPage: React.FC = () => {
                 onClick={() => setActiveSubject(isSelected ? null : sub)}
                 className={`px-2.5 py-1 rounded-lg text-xs font-medium shrink-0 transition-all ${
                   isSelected
-                    ? 'bg-gradient-to-r from-indigo-600 to-sky-500 text-white shadow-sm'
-                    : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+                    ? 'bg-teal-500 text-slate-950 font-semibold shadow-sm shadow-teal-500/20'
+                    : 'bg-[#0a0e17] text-slate-300 hover:text-white border border-slate-800'
                 }`}
               >
                 {sub}
@@ -161,8 +161,8 @@ export const TutorPage: React.FC = () => {
             <div
               className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${
                 msg.sender === 'student'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-800 text-indigo-400 border border-indigo-500/30'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-slate-900 text-teal-400 border border-teal-500/30'
               }`}
             >
               {msg.sender === 'student' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -172,8 +172,8 @@ export const TutorPage: React.FC = () => {
             <div
               className={`max-w-[85%] rounded-2xl p-4 text-xs sm:text-sm space-y-3 leading-relaxed shadow-sm ${
                 msg.sender === 'student'
-                  ? 'bg-indigo-600 text-white rounded-tr-none'
-                  : 'bg-[#0f172a] border border-slate-800 text-slate-200 rounded-tl-none'
+                  ? 'bg-[#0f1d24] border border-teal-500/30 text-slate-100 rounded-tr-none'
+                  : 'bg-[#0a0e17] border border-slate-800/80 text-slate-200 rounded-tl-none'
               }`}
             >
               {/* Header inside tutor message */}
@@ -182,36 +182,36 @@ export const TutorPage: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="font-semibold text-slate-200">StudyMate AI</span>
                     {msg.topicTag && (
-                      <span className="px-1.5 py-0.2 rounded bg-slate-800 text-sky-300 text-[10px] font-mono">
+                      <span className="px-1.5 py-0.2 rounded bg-slate-900 text-teal-300 text-[10px] font-mono border border-slate-800">
                         {msg.topicTag}
                       </span>
                     )}
 
                     {/* Grounding Mode Badge */}
                     {msg.mode === 'source_grounded' || (msg.citations && msg.citations.length > 0) ? (
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-medium flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-emerald-400" /> Grounded in Library
+                      <span className="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30 text-[10px] font-medium flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-teal-400" /> Grounded in Library
                       </span>
                     ) : msg.mode === 'strict_insufficient' || msg.unverifiedReason ? (
                       <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-[10px] font-medium flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3 text-amber-400" /> Strict Grounding
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10px] font-medium flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-indigo-400" /> General AI (Calibrated)
+                      <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-[10px] font-medium flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-teal-400" /> General AI (Calibrated)
                       </span>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 text-slate-400">
-                    <span>{msg.timestamp}</span>
+                    <span className="font-mono text-[10px]">{msg.timestamp}</span>
                     <button
                       onClick={() => handleCopy(msg.id, msg.text)}
                       className="p-1 hover:text-slate-200 rounded transition-colors"
                       title="Copy response"
                     >
                       {copiedId === msg.id ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-teal-400" />
                       ) : (
                         <Copy className="w-3.5 h-3.5" />
                       )}
@@ -227,8 +227,8 @@ export const TutorPage: React.FC = () => {
 
               {/* General AI Notice */}
               {msg.sender === 'tutor' && !msg.citations?.length && !msg.unverifiedReason && msg.mode !== 'strict_insufficient' && (
-                <div className="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[11px] text-slate-300 flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <div className="p-2.5 rounded-xl bg-[#070b12] border border-slate-800 text-[11px] text-slate-400 flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-teal-400 shrink-0" />
                   <span>
                     Personalized AI explanation calibrated for your level. Not verified against uploaded library documents.
                   </span>
@@ -256,10 +256,10 @@ export const TutorPage: React.FC = () => {
                 <div className="pt-3 border-t border-slate-800/80 space-y-2">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-semibold text-slate-400 flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                      <BookOpen className="w-3.5 h-3.5 text-teal-400" />
                       Verified Source References ({msg.citations.length})
                     </span>
-                    <span className="text-[10px] text-emerald-400 font-mono">
+                    <span className="text-[10px] text-teal-400 font-mono">
                       Conf: {Math.round(msg.citations[0].confidenceScore * 100)}%
                     </span>
                   </div>
@@ -268,29 +268,29 @@ export const TutorPage: React.FC = () => {
                     {msg.citations.map((cit, cidx) => (
                       <div
                         key={cidx}
-                        className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs space-y-1.5"
+                        className="p-3 rounded-xl bg-[#070b12] border border-slate-800 text-xs space-y-1.5"
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5 font-semibold text-sky-300">
-                            <span className="font-mono text-[10px] px-1 py-0.5 rounded bg-slate-800 uppercase">
+                          <div className="flex items-center gap-1.5 font-semibold text-teal-300">
+                            <span className="font-mono text-[10px] px-1 py-0.5 rounded bg-slate-900 border border-slate-800 uppercase">
                               {cit.fileType}
                             </span>
                             <span className="truncate">{cit.resourceTitle}</span>
                           </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold shrink-0">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 border border-teal-500/30 font-bold shrink-0">
                             {cit.location}
                           </span>
                         </div>
 
                         {/* Quoted Snippet */}
-                        <div className="p-2 rounded bg-slate-900 border border-slate-800/80 text-[11px] text-slate-300 font-mono italic leading-relaxed">
+                        <div className="p-2 rounded bg-black/40 border border-slate-800/80 text-[11px] text-slate-300 font-mono italic leading-relaxed">
                           "{cit.snippet}"
                         </div>
 
                         <div className="flex justify-end pt-1">
                           <button
                             onClick={() => handleInspectCitationDoc(cit)}
-                            className="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+                            className="text-[10px] font-semibold text-teal-400 hover:text-teal-300 flex items-center gap-1 transition-colors"
                           >
                             <span>Inspect Full Document in Library</span>
                             <ExternalLink className="w-3 h-3" />
@@ -306,7 +306,7 @@ export const TutorPage: React.FC = () => {
               {msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
                   <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-sky-400" /> Suggested Follow-Ups:
+                    <Sparkles className="w-3 h-3 text-teal-400" /> Suggested Follow-Ups:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {msg.suggestedFollowUps.map((q, qidx) => (
@@ -328,14 +328,14 @@ export const TutorPage: React.FC = () => {
         {/* Thinking Indicator */}
         {isChatThinking && (
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-800 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-slate-900 text-teal-400 border border-teal-500/30 flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4 animate-pulse" />
             </div>
-            <div className="p-4 rounded-2xl rounded-tl-none bg-[#0f172a] border border-slate-800 flex items-center gap-3">
+            <div className="p-4 rounded-2xl rounded-tl-none bg-[#0a0e17] border border-slate-800/80 flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-2 h-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 rounded-full bg-teal-400 animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
               <span className="text-xs text-slate-400">
                 Searching vector index & checking source citations...
@@ -348,7 +348,7 @@ export const TutorPage: React.FC = () => {
       </div>
 
       {/* Input Box Footer */}
-      <div className="mt-3 p-3 rounded-2xl bg-[#0f172a] border border-slate-800 shrink-0 space-y-2">
+      <div className="mt-3 p-3 rounded-2xl bg-[#0a0e17] border border-slate-800/80 shrink-0 space-y-2">
         {/* Quick query chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-[11px] text-slate-400 scrollbar-none">
           <span className="font-semibold text-slate-500 shrink-0">Try asking:</span>
@@ -386,13 +386,13 @@ export const TutorPage: React.FC = () => {
             onChange={e => setInputPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask a conceptual question, mathematical proof, or clarify lecture transcripts... (Enter to send, Shift+Enter for newline)"
-            className="flex-1 p-2.5 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"
+            className="flex-1 p-2.5 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500 resize-none"
           />
 
           <button
             onClick={() => handleSend()}
             disabled={!inputPrompt.trim() || isChatThinking}
-            className="p-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-all shrink-0"
+            className="p-3 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-md shadow-teal-500/20 disabled:opacity-50 disabled:hover:bg-teal-500 transition-all shrink-0"
           >
             <Send className="w-4 h-4" />
           </button>

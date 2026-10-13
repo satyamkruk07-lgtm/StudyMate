@@ -331,11 +331,11 @@ export const QuizPage: React.FC = () => {
       {/* 1. SETUP STATE */}
       {quizState === 'setup' && (
         <div className="space-y-6">
-          <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl space-y-6">
+          <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800/80 gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-indigo-500/20 text-indigo-400">
+                <div className="p-3 rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
                   <BrainCircuit className="w-6 h-6" />
                 </div>
                 <div>
@@ -350,7 +350,7 @@ export const QuizPage: React.FC = () => {
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] self-start sm:self-auto">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    apiMode === 'fastapi-connected' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                    apiMode === 'fastapi-connected' ? 'bg-teal-400 animate-pulse' : 'bg-amber-400'
                   }`}
                 />
                 <span className="text-slate-300 font-mono">
@@ -377,13 +377,13 @@ export const QuizPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Material Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   1. Source Material
                 </label>
                 <select
                   value={selectedDocId}
                   onChange={e => setSelectedDocId(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
                 >
                   <option value="all">All Uploaded Course Materials ({resources.length} files)</option>
                   {resources.map(res => (
@@ -399,13 +399,13 @@ export const QuizPage: React.FC = () => {
 
               {/* Topic Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   2. Select Topic Focus
                 </label>
                 <select
                   value={selectedTopic}
                   onChange={e => setSelectedTopic(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                  className="w-full p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
                 >
                   {availableTopics.map(t => (
                     <option key={t} value={t}>
@@ -420,7 +420,7 @@ export const QuizPage: React.FC = () => {
 
               {/* Question Type */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   3. Question Format
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -436,8 +436,8 @@ export const QuizPage: React.FC = () => {
                       onClick={() => setSelectedQuestionType(opt.id)}
                       className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
                         selectedQuestionType === opt.id
-                          ? 'bg-indigo-600/20 border-indigo-500 text-white font-semibold'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-teal-500/10 border-teal-500 text-teal-300 font-semibold'
+                          : 'bg-[#070b12] border-slate-800 text-slate-400 hover:border-slate-700'
                       }`}
                     >
                       {opt.label}
@@ -448,7 +448,7 @@ export const QuizPage: React.FC = () => {
 
               {/* Difficulty Level */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
                   4. Difficulty Level
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -459,8 +459,8 @@ export const QuizPage: React.FC = () => {
                       onClick={() => setSelectedDifficulty(lvl)}
                       className={`p-2.5 rounded-xl border text-center transition-all ${
                         selectedDifficulty === lvl
-                          ? 'bg-indigo-600/20 border-indigo-500 text-white font-semibold'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+                          ? 'bg-teal-500/10 border-teal-500 text-teal-300 font-semibold'
+                          : 'bg-[#070b12] border-slate-800 text-slate-400 hover:border-slate-700'
                       }`}
                     >
                       <div className="text-xs font-bold">{lvl}</div>
@@ -468,7 +468,7 @@ export const QuizPage: React.FC = () => {
                   ))}
                 </div>
                 <div className="mt-4">
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                  <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2">
                     5. Question Count
                   </label>
                   <div className="flex gap-2">
@@ -479,8 +479,8 @@ export const QuizPage: React.FC = () => {
                         onClick={() => setQuestionCount(num)}
                         className={`flex-1 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
                           questionCount === num
-                            ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+                            ? 'bg-teal-500/10 border-teal-500 text-teal-300'
+                            : 'bg-[#070b12] border-slate-800 text-slate-400 hover:border-slate-700'
                         }`}
                       >
                         {num} Qs
@@ -492,14 +492,14 @@ export const QuizPage: React.FC = () => {
             </div>
 
             {/* Launch Action */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
               <div className="text-xs text-slate-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <Sparkles className="w-3.5 h-3.5 text-teal-400" />
                 <span>Source citations preserved for post-quiz evaluation audit</span>
               </div>
               <button
                 onClick={handleStartQuiz}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20 transition-all"
               >
                 <span>Generate Grounded Quiz</span>
                 <ArrowRight className="w-4 h-4" />
@@ -509,10 +509,10 @@ export const QuizPage: React.FC = () => {
 
           {/* Past Assessment History */}
           {quizAttempts.length > 0 && (
-            <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-indigo-400" />
+                  <Clock className="w-4 h-4 text-teal-400" />
                   <h3 className="font-bold text-sm text-white">Recent Quiz Attempts</h3>
                 </div>
                 <span className="text-xs text-slate-400 font-mono">{quizAttempts.length} Total Sessions</span>
@@ -522,12 +522,12 @@ export const QuizPage: React.FC = () => {
                 {quizAttempts.slice(0, 3).map(att => (
                   <div
                     key={att.id}
-                    className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                    className="p-3.5 rounded-xl bg-[#070b12] border border-slate-800 flex items-center justify-between gap-3 text-xs"
                   >
                     <div>
                       <div className="font-semibold text-slate-200 flex items-center gap-2">
                         <span>{att.topic}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 font-mono">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-teal-300 font-mono border border-slate-800">
                           {att.difficulty}
                         </span>
                       </div>
@@ -535,7 +535,7 @@ export const QuizPage: React.FC = () => {
                         {att.correctAnswers} / {att.totalQuestions} Correct • Completed at {att.completedAt}
                       </div>
                     </div>
-                    <div className="font-mono font-bold text-sm text-emerald-400">{att.scorePercentage}%</div>
+                    <div className="font-mono font-bold text-sm text-teal-400">{att.scorePercentage}%</div>
                   </div>
                 ))}
               </div>
@@ -546,8 +546,8 @@ export const QuizPage: React.FC = () => {
 
       {/* 2. GENERATING STATE */}
       {quizState === 'generating' && (
-        <div className="p-12 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl text-center space-y-4">
-          <Loader2 className="w-10 h-10 text-indigo-400 animate-spin mx-auto" />
+        <div className="p-12 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-teal-400 animate-spin mx-auto" />
           <h3 className="text-lg font-bold text-white">Generating Source-Grounded Questions</h3>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
             Retrieving relevant chunks via BM25 and generating schema-validated questions with Gemini AI. Correct
@@ -560,16 +560,16 @@ export const QuizPage: React.FC = () => {
       {quizState === 'active' && currentQ && (
         <div className="space-y-4">
           {/* Top Navigation & Status */}
-          <div className="p-4 rounded-2xl bg-[#0f172a] border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-[#0a0e17] border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-white">
                   Question {currentIdx + 1} of {activeQuestions.length}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/30">
                   {currentQ.topic}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-sky-300">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-slate-300 border border-slate-800">
                   {currentQ.difficulty}
                 </span>
               </div>
@@ -584,9 +584,9 @@ export const QuizPage: React.FC = () => {
                       onClick={() => setCurrentIdx(idx)}
                       className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition-all ${
                         isCurrent
-                          ? 'bg-indigo-600 text-white shadow-md'
+                          ? 'bg-teal-500 text-slate-950 shadow-md'
                           : answered
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                          ? 'bg-teal-500/15 text-teal-300 border border-teal-500/40'
                           : 'bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700'
                       }`}
                     >
@@ -610,10 +610,10 @@ export const QuizPage: React.FC = () => {
           </div>
 
           {/* Question Card */}
-          <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl space-y-6">
+          <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl space-y-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="uppercase font-mono tracking-wider font-semibold text-indigo-400">
+                <span className="uppercase font-mono tracking-wider font-semibold text-teal-400">
                   {currentQ.question_type === 'mcq'
                     ? 'Multiple Choice Question'
                     : currentQ.question_type === 'short-answer'
@@ -639,13 +639,13 @@ export const QuizPage: React.FC = () => {
                         onClick={() => handleSelectOption(currentQ.id, optIdx.toString())}
                         className={`w-full p-3.5 rounded-xl border text-left text-xs sm:text-sm font-medium transition-all flex items-start gap-3 ${
                           isSelected
-                            ? 'bg-indigo-600/25 border-indigo-500 text-white shadow-sm ring-1 ring-indigo-500'
-                            : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+                            ? 'bg-teal-500/10 border-teal-500 text-white shadow-sm ring-1 ring-teal-500/50'
+                            : 'bg-[#070b12] border-slate-800 text-slate-300 hover:border-slate-700'
                         }`}
                       >
                         <span
                           className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs ${
-                            isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'
+                            isSelected ? 'bg-teal-500 text-slate-950' : 'bg-slate-900 text-slate-400 border border-slate-800'
                           }`}
                         >
                           {String.fromCharCode(65 + optIdx)}
@@ -665,7 +665,7 @@ export const QuizPage: React.FC = () => {
                     value={userAnswers[currentQ.id] || ''}
                     onChange={e => handleTextAnswerChange(currentQ.id, e.target.value)}
                     placeholder="Enter your source-grounded explanation. Be specific about key formulas, assumptions, or mechanisms..."
-                    className="w-full p-3.5 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full p-3.5 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500"
                   />
                   <div className="text-[11px] text-slate-400 flex items-center justify-between">
                     <span>Will be evaluated against verified model rubric and conceptual keywords.</span>
@@ -684,7 +684,7 @@ export const QuizPage: React.FC = () => {
                       value={userAnswers[currentQ.id] || ''}
                       onChange={e => handleTextAnswerChange(currentQ.id, e.target.value)}
                       placeholder="Enter computed value..."
-                      className="w-64 p-3 text-sm font-mono rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-indigo-500"
+                      className="w-64 p-3 text-sm font-mono rounded-xl bg-slate-950 border border-slate-800 text-slate-100 focus:outline-none focus:border-teal-500"
                     />
                     {currentQ.unit && <span className="text-xs font-mono text-slate-400">{currentQ.unit}</span>}
                   </div>
@@ -696,11 +696,11 @@ export const QuizPage: React.FC = () => {
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
               <button
                 disabled={currentIdx === 0}
                 onClick={() => setCurrentIdx(prev => Math.max(0, prev - 1))}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 disabled:opacity-40 text-xs font-medium"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#070b12] border border-slate-800 text-slate-300 disabled:opacity-40 text-xs font-medium"
               >
                 <ChevronLeft className="w-4 h-4" />
                 <span>Previous</span>
@@ -710,7 +710,7 @@ export const QuizPage: React.FC = () => {
                 {currentIdx < activeQuestions.length - 1 ? (
                   <button
                     onClick={() => setCurrentIdx(prev => prev + 1)}
-                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs transition-all"
+                    className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-white font-semibold text-xs border border-slate-700 transition-all"
                   >
                     <span>Next Question</span>
                     <ChevronRight className="w-4 h-4" />
@@ -718,7 +718,7 @@ export const QuizPage: React.FC = () => {
                 ) : (
                   <button
                     onClick={handleFinalSubmit}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-teal-500/20 transition-all"
                   >
                     <span>Submit Quiz for Evaluation</span>
                     <Check className="w-4 h-4" />
@@ -732,8 +732,8 @@ export const QuizPage: React.FC = () => {
 
       {/* 4. SUBMITTING STATE */}
       {quizState === 'submitting' && (
-        <div className="p-12 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl text-center space-y-4">
-          <Loader2 className="w-10 h-10 text-emerald-400 animate-spin mx-auto" />
+        <div className="p-12 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-teal-400 animate-spin mx-auto" />
           <h3 className="text-lg font-bold text-white">Evaluating Quiz Submission</h3>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
             Deterministically scoring MCQs & numerical bounds, grading short answers against AI rubrics, and updating
@@ -746,10 +746,10 @@ export const QuizPage: React.FC = () => {
       {quizState === 'results' && attemptResult && (
         <div className="space-y-6">
           {/* Top Score Banner */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#111936] to-[#0f172a] border border-indigo-500/30 shadow-2xl space-y-4">
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#0a0e17] border border-teal-500/30 shadow-2xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
                   Assessment Completed • {attemptResult.topic}
                 </span>
                 <h2 className="text-2xl font-extrabold text-white tracking-tight">Assessment Evaluation Audit</h2>
@@ -758,9 +758,9 @@ export const QuizPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="text-right sm:text-center p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
+              <div className="text-right sm:text-center p-4 rounded-2xl bg-[#070b12] border border-slate-800">
                 <div className="text-3xl font-extrabold text-white font-mono">{attemptResult.score_percentage}%</div>
-                <div className="text-xs text-emerald-400 font-semibold">
+                <div className="text-xs text-teal-400 font-semibold">
                   {attemptResult.correct_answers} / {attemptResult.total_questions} Correct
                 </div>
               </div>
@@ -779,7 +779,7 @@ export const QuizPage: React.FC = () => {
               </div>
               <div>
                 <span className="text-slate-400 block text-[11px]">Bayesian Mastery</span>
-                <span className="font-semibold text-emerald-400 flex items-center gap-1">
+                <span className="font-semibold text-teal-400 flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" /> Beta-Binomial Posterior Updated
                 </span>
               </div>
@@ -793,14 +793,14 @@ export const QuizPage: React.FC = () => {
             </h3>
 
             {attemptResult.question_results.map((res, idx) => (
-              <div key={idx} className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4 shadow-sm">
+              <div key={idx} className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 space-y-4 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs font-bold text-slate-400">Q{idx + 1}.</span>
                     <h4 className="font-bold text-xs sm:text-sm text-white">{res.question_prompt}</h4>
                   </div>
                   {res.is_correct ? (
-                    <span className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                    <span className="flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 border border-teal-500/30 shrink-0">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Full Credit (1.0)
                     </span>
                   ) : (
@@ -811,7 +811,7 @@ export const QuizPage: React.FC = () => {
                 </div>
 
                 {/* Answers & Feedback Card */}
-                <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs space-y-2">
+                <div className="p-3.5 rounded-xl bg-[#070b12] border border-slate-800/80 text-xs space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
                     <div>
                       <span className="text-slate-400 block text-[11px]">Your Submitted Answer:</span>
@@ -819,12 +819,12 @@ export const QuizPage: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-slate-400 block text-[11px]">Expected Grounded Answer:</span>
-                      <span className="font-mono text-emerald-300 font-semibold">{res.expected_answer}</span>
+                      <span className="font-mono text-teal-300 font-semibold">{res.expected_answer}</span>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-slate-900 text-slate-300 leading-relaxed">
-                    <strong className="text-sky-300">Evaluator Feedback: </strong> {res.feedback}
+                    <strong className="text-teal-300">Evaluator Feedback: </strong> {res.feedback}
                   </div>
 
                   {res.misconception && (
@@ -839,12 +839,12 @@ export const QuizPage: React.FC = () => {
                 </div>
 
                 {/* Supporting Source Citation */}
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="p-3 rounded-xl bg-[#070b12] border border-slate-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="space-y-0.5">
                     <div className="font-semibold text-slate-300 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                      <BookOpen className="w-3.5 h-3.5 text-teal-400" />
                       <span>{res.source_doc_name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-indigo-300">
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-900 text-teal-300 border border-slate-800">
                         {res.source_location}
                       </span>
                     </div>
@@ -855,7 +855,7 @@ export const QuizPage: React.FC = () => {
 
                   <button
                     onClick={() => handleInspectCitation(res.source_doc_name)}
-                    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 whitespace-nowrap self-end sm:self-auto flex items-center gap-1"
+                    className="text-xs font-semibold text-teal-400 hover:text-teal-300 whitespace-nowrap self-end sm:self-auto flex items-center gap-1"
                   >
                     <span>Inspect Document</span>
                     <ExternalLink className="w-3 h-3" />
@@ -866,10 +866,10 @@ export const QuizPage: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
             <button
               onClick={() => setQuizState('setup')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#070b12] hover:bg-slate-900 text-slate-200 font-semibold text-xs border border-slate-800"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Take Another Quiz</span>
@@ -877,7 +877,7 @@ export const QuizPage: React.FC = () => {
 
             <button
               onClick={() => setCurrentPage('mastery')}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold text-xs shadow-lg shadow-teal-500/20"
             >
               <span>View Bayesian Mastery & Recommendations</span>
               <ArrowRight className="w-4 h-4" />

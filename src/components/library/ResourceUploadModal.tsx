@@ -91,12 +91,12 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-xl p-6 bg-[#0f172a] rounded-2xl border border-slate-700/80 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-xl p-6 bg-[#0a0e17] rounded-2xl border border-slate-800 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+            <div className="p-2 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20">
               <Upload className="w-5 h-5" />
             </div>
             <div>
@@ -116,37 +116,37 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
         </div>
 
         {/* Backend mode indicator */}
-        <div className="mt-3 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <div className="mt-3 px-3 py-1.5 rounded-lg bg-[#070b12] border border-slate-800 flex items-center justify-between text-xs text-slate-400">
           <span>Active Backend Target:</span>
-          <span className="font-mono text-[11px] text-sky-400">
+          <span className="font-mono text-[11px] text-teal-400">
             {apiMode === 'fastapi-connected' ? 'FastAPI Ingestion Engine' : 'In-Browser Engine'}
           </span>
         </div>
 
         {/* Preset quick test buttons */}
-        <div className="mt-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+        <div className="mt-3 p-3 rounded-xl bg-[#070b12] border border-slate-800">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-2">
             Quick Preset Test Files:
           </span>
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => handleLoadSampleTemplate('txt')}
-              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-center"
+              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-center"
             >
               📝 Notes (.txt)
             </button>
             <button
               type="button"
               onClick={() => handleLoadSampleTemplate('pptx')}
-              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 border border-orange-500/30 text-center"
+              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-center"
             >
               📊 Slides (.pptx)
             </button>
             <button
               type="button"
               onClick={() => handleLoadSampleTemplate('pdf')}
-              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-center"
+              className="px-2 py-1.5 text-[11px] font-medium rounded-lg bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 text-center"
             >
               📄 Paper (.pdf)
             </button>
@@ -175,11 +175,11 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
             />
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-4 text-center cursor-pointer transition-colors bg-slate-950/60"
+              className="border-2 border-dashed border-slate-800 hover:border-teal-500 rounded-xl p-4 text-center cursor-pointer transition-colors bg-[#070b12]"
             >
               {selectedFile ? (
-                <div className="flex items-center justify-center gap-2 text-xs text-emerald-300">
-                  <FileCheck className="w-5 h-5 text-emerald-400" />
+                <div className="flex items-center justify-center gap-2 text-xs text-teal-300">
+                  <FileCheck className="w-5 h-5 text-teal-400" />
                   <span className="font-semibold">{selectedFile.name}</span>
                   <span className="text-slate-400 font-mono">
                     {selectedFile.size < 1024 * 1024
@@ -212,7 +212,7 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Chapter 4 Notes, Lecture 5 Slides"
-                className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-teal-500 focus:outline-none"
               />
             </div>
 
@@ -224,7 +224,7 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
                 <select
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-teal-500 focus:outline-none"
                 >
                   {profile?.selected_subjects && profile.selected_subjects.length > 0 ? (
                     profile.selected_subjects.map(s => (
@@ -252,7 +252,7 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
                 placeholder="e.g. Relational Calculus, Photosynthesis, Scaled Attention"
-                className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2 text-xs rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:border-teal-500 focus:outline-none"
               />
             </div>
           </div>
@@ -269,11 +269,11 @@ export const ResourceUploadModal: React.FC<ResourceUploadModalProps> = ({
             <button
               type="submit"
               disabled={isUploading || !selectedFile}
-              className="flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 disabled:opacity-50 transition-all"
+              className="flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-lg shadow-teal-500/20 disabled:opacity-50 transition-all"
             >
               {isUploading ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="w-3.5 h-3.5 border-2 border-slate-950/30 border-t-slate-950 rounded-full animate-spin" />
                   <span>Extracting & Indexing...</span>
                 </>
               ) : (

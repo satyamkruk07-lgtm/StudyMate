@@ -37,10 +37,10 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1d] text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
       {/* Ambient background glows */}
-      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-sky-500/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-teal-500/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-slate-800/20 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Back to Home Button */}
       <div className="w-full max-w-md mb-6">
@@ -53,10 +53,10 @@ export const LoginPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-gradient-to-b from-[#111936] to-[#0c1224] border border-slate-800 shadow-2xl relative z-10 space-y-6">
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-[#0a0e17] border border-slate-800/80 shadow-2xl relative z-10 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 text-white shadow-lg shadow-indigo-600/30 mb-1">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400 shadow-lg shadow-teal-950/40 mb-1">
             <GraduationCap className="w-6 h-6" />
           </div>
           <h2 className="text-2xl font-extrabold text-white tracking-tight">Welcome Back</h2>
@@ -85,7 +85,7 @@ export const LoginPage: React.FC = () => {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="student@example.com"
                 required
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all font-mono"
               />
             </div>
           </div>
@@ -102,7 +102,7 @@ export const LoginPage: React.FC = () => {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                className="w-full pl-10 pr-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
               />
             </div>
           </div>
@@ -110,7 +110,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full mt-2 py-3 px-4 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <span>Authenticating...</span>
@@ -127,7 +127,7 @@ export const LoginPage: React.FC = () => {
           Don't have an account yet?{' '}
           <button
             onClick={() => setCurrentPage('signup')}
-            className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+            className="text-teal-400 hover:text-teal-300 font-semibold transition-colors"
           >
             Create an account
           </button>

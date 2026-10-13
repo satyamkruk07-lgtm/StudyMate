@@ -56,11 +56,11 @@ export const EvaluationPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Header Banner */}
-      <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 space-y-3">
+      <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/25 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" /> Track D Empirical Evaluation Suite
               </span>
               <span className="text-xs text-slate-400 font-mono">Benchmark v1.2</span>
@@ -76,7 +76,7 @@ export const EvaluationPage: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleExportJson}
-              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 transition-all shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export Benchmark JSON</span>
@@ -85,14 +85,14 @@ export const EvaluationPage: React.FC = () => {
         </div>
 
         {/* Academic Grounding Notice */}
-        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-indigo-500/20 flex items-start gap-3 text-xs text-slate-300">
-          <div className="p-1 rounded bg-indigo-500/20 text-indigo-400 mt-0.5">
+        <div className="p-3.5 rounded-xl bg-[#070b12] border border-teal-500/20 flex items-start gap-3 text-xs text-slate-300">
+          <div className="p-1 rounded bg-teal-500/10 text-teal-400 mt-0.5">
             <HelpCircle className="w-3.5 h-3.5" />
           </div>
           <div className="space-y-0.5">
             <span className="font-bold text-slate-200">Data Provenance & Disclosure Notice:</span>
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              In accordance with hackathon competition rules, metrics tagged <span className="font-semibold text-purple-300">Measured Benchmark</span> are validated against offline annotated test suites (180 question-context pairs, 55 adversarial queries). Metrics tagged <span className="font-semibold text-slate-400">Illustrative Telemetry</span> reflect real-time client usage signals.
+              In accordance with hackathon competition rules, metrics tagged <span className="font-semibold text-teal-300 font-mono">Measured Benchmark</span> are validated against offline annotated test suites (180 question-context pairs, 55 adversarial queries). Metrics tagged <span className="font-semibold text-slate-400 font-mono">Illustrative Telemetry</span> reflect real-time client usage signals.
             </p>
           </div>
         </div>
@@ -103,19 +103,19 @@ export const EvaluationPage: React.FC = () => {
         {EVALUATION_METRICS.map(metric => (
           <div
             key={metric.id}
-            className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800/90 hover:border-slate-700 flex flex-col justify-between space-y-4 shadow-sm"
+            className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800/80 hover:border-slate-700 flex flex-col justify-between space-y-4 shadow-sm"
           >
             <div>
               <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
                   {metric.category}
                 </span>
                 {metric.isMeasuredBenchmark ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/25">
                     Measured Benchmark
                   </span>
                 ) : (
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                  <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
                     Illustrative Telemetry
                   </span>
                 )}
@@ -135,11 +135,11 @@ export const EvaluationPage: React.FC = () => {
                   <span className="text-2xl font-extrabold text-white font-mono">
                     {metric.score}{metric.name.includes('Latency') ? 's' : '%'}
                   </span>
-                  <span className="text-xs text-slate-400 ml-1.5">
+                  <span className="text-xs text-slate-400 ml-1.5 font-mono">
                     (Target: {metric.benchmarkTarget}{metric.name.includes('Latency') ? 's' : '%'})
                   </span>
                 </div>
-                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-0.5">
+                <span className="text-xs font-semibold text-teal-400 flex items-center gap-0.5">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Target Met
                 </span>
               </div>
@@ -154,8 +154,8 @@ export const EvaluationPage: React.FC = () => {
       </div>
 
       {/* Benchmark Test Cases Explorer */}
-      <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
           <div>
             <h3 className="font-bold text-base text-white tracking-tight">
               Test Case Audit & Hallucination Guardrail Inspector
@@ -172,8 +172,8 @@ export const EvaluationPage: React.FC = () => {
                 onClick={() => setFilterType(tab)}
                 className={`px-3 py-1.5 text-xs rounded-xl font-medium capitalize transition-colors ${
                   filterType === tab
-                    ? 'bg-indigo-600 text-white font-semibold'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                    ? 'bg-teal-500 text-slate-950 font-semibold'
+                    : 'bg-[#070b12] text-slate-400 hover:text-slate-200 border border-slate-800'
                 }`}
               >
                 {tab === 'all' ? 'All Pairs' : tab === 'grounded' ? 'In-Corpus Grounded' : 'Unsupported / Out-of-Domain'}
@@ -196,8 +196,8 @@ export const EvaluationPage: React.FC = () => {
                   onClick={() => setSelectedTestCase(tc)}
                   className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-slate-900 border-indigo-500 shadow-md ring-1 ring-indigo-500/40'
-                      : 'bg-slate-950/70 border-slate-800/90 hover:border-slate-700'
+                      ? 'bg-[#0e1726] border-teal-500 shadow-md ring-1 ring-teal-500/40'
+                      : 'bg-[#070b12] border-slate-800/90 hover:border-slate-700'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -206,7 +206,7 @@ export const EvaluationPage: React.FC = () => {
                         <span className="font-mono text-slate-400 font-bold">{tc.id}</span>
                         <span>•</span>
                         <span className={`px-1.5 py-0.2 rounded font-mono ${
-                          isOOD ? 'bg-amber-500/15 text-amber-300' : 'bg-slate-800 text-sky-300'
+                          isOOD ? 'bg-amber-500/15 text-amber-300' : 'bg-slate-900 text-teal-300 border border-slate-800'
                         }`}>
                           {tc.topic}
                         </span>
@@ -215,8 +215,8 @@ export const EvaluationPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-mono">
-                      <span className="text-emerald-400 font-semibold">{Math.round(tc.faithfulnessScore * 100)}%</span>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-teal-400 font-semibold">{Math.round(tc.faithfulnessScore * 100)}%</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
                     </div>
                   </div>
                 </div>
@@ -226,9 +226,9 @@ export const EvaluationPage: React.FC = () => {
 
           {/* Detailed Inspector Pane */}
           {selectedTestCase ? (
-            <div className="p-5 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-4 text-xs">
+            <div className="p-5 rounded-2xl bg-[#070b12] border border-slate-800 space-y-4 text-xs">
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <span className="font-mono text-[11px] text-indigo-400 font-bold">
+                <span className="font-mono text-[11px] text-teal-400 font-bold">
                   Test Case: {selectedTestCase.id} ({selectedTestCase.topic})
                 </span>
                 <span className="font-mono text-[11px] text-slate-400">
@@ -237,28 +237,28 @@ export const EvaluationPage: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Student Test Query
                 </span>
-                <p className="font-semibold text-white bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                <p className="font-semibold text-white bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                   "{selectedTestCase.query}"
                 </p>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Retrieved Grounding Documents
                 </span>
-                <p className="text-sky-300 font-mono bg-slate-900 p-2.5 rounded-lg border border-slate-800">
+                <p className="text-teal-300 font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-800">
                   {selectedTestCase.retrievedDocs}
                 </p>
               </div>
 
               <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block mb-1">
                   Generated Tutor Response
                 </span>
-                <div className="text-slate-300 bg-slate-900 p-2.5 rounded-lg border border-slate-800 leading-relaxed whitespace-pre-wrap">
+                <div className="text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 leading-relaxed whitespace-pre-wrap">
                   {selectedTestCase.generatedAnswer}
                 </div>
               </div>
@@ -266,11 +266,11 @@ export const EvaluationPage: React.FC = () => {
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px]">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400">Faithfulness Score:</span>
-                  <span className="font-mono font-bold text-emerald-400">{selectedTestCase.faithfulnessScore} / 1.0</span>
+                  <span className="font-mono font-bold text-teal-400">{selectedTestCase.faithfulnessScore} / 1.0</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400">Abstention Verified:</span>
-                  <span className="font-bold text-emerald-400">✓ Strict Guard</span>
+                  <span className="font-bold text-teal-400 font-mono">✓ Strict Guard</span>
                 </div>
               </div>
             </div>

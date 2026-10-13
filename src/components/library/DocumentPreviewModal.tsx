@@ -60,14 +60,14 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-[#0f172a] rounded-2xl border border-slate-700/80 shadow-2xl text-slate-100 max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-2xl bg-[#0a0e17] rounded-2xl border border-slate-800 shadow-2xl text-slate-100 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-5 border-b border-slate-800 flex items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               {getFormatBadge(resource.fileType)}
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 text-teal-300 border border-slate-800">
                 {resource.topic}
               </span>
               <span className="text-xs text-slate-400 font-mono">{resource.fileSize}</span>
@@ -89,10 +89,10 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {/* Summary */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-500 mb-2">
               Document Abstract & Context
             </h4>
-            <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+            <div className="p-3.5 rounded-xl bg-[#070b12] border border-slate-800 text-xs text-slate-300 leading-relaxed">
               {resource.summary}
             </div>
           </div>
@@ -100,30 +100,30 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
           {/* Vectorized Chunks */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-indigo-400" />
+              <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-teal-400" />
                 Indexed Vector Chunks ({resource.chunks.length} extracted)
               </h4>
-              <span className="text-[11px] text-emerald-400 font-mono">100% Vectorized for RAG</span>
+              <span className="text-[11px] text-teal-400 font-mono">100% Vectorized for RAG</span>
             </div>
 
             <div className="space-y-3">
               {resource.chunks.map((ch, idx) => (
                 <div
                   key={ch.id || idx}
-                  className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/90 hover:border-slate-700 space-y-2 transition-colors"
+                  className="p-3.5 rounded-xl bg-[#070b12] border border-slate-800/90 hover:border-slate-700 space-y-2 transition-colors"
                 >
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-mono font-bold text-indigo-300 flex items-center gap-1">
-                      <Tag className="w-3 h-3 text-indigo-400" />
+                    <span className="font-mono font-bold text-teal-300 flex items-center gap-1">
+                      <Tag className="w-3 h-3 text-teal-400" />
                       Chunk #{ch.chunkIndex || idx + 1} • {ch.location}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono text-[10px]">
+                    <span className="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 font-mono text-[10px] border border-slate-800">
                       Grounding Anchor
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-200 font-mono bg-slate-950/70 p-2.5 rounded-lg border border-slate-900 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs text-slate-200 font-mono bg-black/40 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed whitespace-pre-wrap">
                     "{ch.content}"
                   </p>
 
@@ -132,7 +132,7 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
                       {ch.keywords.map((kw, kidx) => (
                         <span
                           key={kidx}
-                          className="px-1.5 py-0.5 rounded text-[10px] bg-slate-800/80 text-slate-400 font-mono"
+                          className="px-1.5 py-0.5 rounded text-[10px] bg-slate-900 text-slate-400 font-mono border border-slate-800"
                         >
                           #{kw}
                         </span>
@@ -146,22 +146,22 @@ export const DocumentPreviewModal: React.FC<DocumentPreviewModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
+        <div className="p-4 border-t border-slate-800 bg-[#070b12] flex items-center justify-between">
           <span className="text-xs text-slate-400">
-            Status: <span className="text-emerald-400 font-semibold uppercase text-[11px]">Ready for Citations</span>
+            Status: <span className="text-teal-400 font-semibold uppercase text-[11px]">Ready for Citations</span>
           </span>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleAskTutor}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-500/10 text-teal-300 border border-teal-500/30 hover:bg-teal-500/20 transition-all"
             >
               <Bot className="w-3.5 h-3.5" />
               <span>Query in AI Tutor</span>
             </button>
             <button
               onClick={handleLaunchQuiz}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 transition-all shadow-md shadow-teal-500/20"
             >
               <BrainCircuit className="w-3.5 h-3.5" />
               <span>Generate Quiz</span>

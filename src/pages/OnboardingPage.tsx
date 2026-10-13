@@ -229,16 +229,16 @@ export const OnboardingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1d] text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden font-sans">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-500/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-800/20 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="w-full max-w-2xl relative z-10 space-y-6">
         {/* Top Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 shadow-md shadow-teal-950/40">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
@@ -258,7 +258,7 @@ export const OnboardingPage: React.FC = () => {
         </div>
 
         {/* Wizard Card Container */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-[#111936] to-[#0c1224] border border-slate-800 shadow-2xl space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-2xl space-y-6">
           {/* Progress Indicators */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold">
@@ -270,11 +270,11 @@ export const OnboardingPage: React.FC = () => {
                   ? 'Academic Information'
                   : 'Subjects & Curriculum'}
               </span>
-              <span className="text-indigo-400 font-mono">{Math.round((step / 3) * 100)}% Complete</span>
+              <span className="text-teal-400 font-mono">{Math.round((step / 3) * 100)}% Complete</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
               <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-sky-400 rounded-full transition-all duration-300"
+                className="h-full bg-teal-400 rounded-full transition-all duration-300"
                 style={{ width: `${(step / 3) * 100}%` }}
               />
             </div>
@@ -306,12 +306,12 @@ export const OnboardingPage: React.FC = () => {
                   onClick={() => setEducationLevel('school')}
                   className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
                     educationLevel === 'school'
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-600/20'
-                      : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+                      ? 'bg-teal-500/10 border-teal-500 text-white shadow-lg shadow-teal-950/20'
+                      : 'bg-[#070b12] border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
                   <div className="space-y-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
                       <School className="w-5 h-5" />
                     </div>
                     <div className="font-bold text-sm text-white">School Student</div>
@@ -320,7 +320,7 @@ export const OnboardingPage: React.FC = () => {
                     </p>
                   </div>
                   {educationLevel === 'school' && (
-                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-indigo-400">
+                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-teal-400">
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Selected</span>
                     </div>
@@ -332,12 +332,12 @@ export const OnboardingPage: React.FC = () => {
                   onClick={() => setEducationLevel('college')}
                   className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
                     educationLevel === 'college'
-                      ? 'bg-sky-600/20 border-sky-500 text-white shadow-lg shadow-sky-600/20'
-                      : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+                      ? 'bg-teal-500/10 border-teal-500 text-white shadow-lg shadow-teal-950/20'
+                      : 'bg-[#070b12] border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
                   <div className="space-y-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
                       <Building2 className="w-5 h-5" />
                     </div>
                     <div className="font-bold text-sm text-white">College Student</div>
@@ -346,7 +346,7 @@ export const OnboardingPage: React.FC = () => {
                     </p>
                   </div>
                   {educationLevel === 'college' && (
-                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-sky-400">
+                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-teal-400">
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Selected</span>
                     </div>
@@ -358,12 +358,12 @@ export const OnboardingPage: React.FC = () => {
                   onClick={() => setEducationLevel('self')}
                   className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
                     educationLevel === 'self'
-                      ? 'bg-purple-600/20 border-purple-500 text-white shadow-lg shadow-purple-600/20'
-                      : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+                      ? 'bg-teal-500/10 border-teal-500 text-white shadow-lg shadow-teal-950/20'
+                      : 'bg-[#070b12] border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
                   <div className="space-y-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
                       <UserCheck className="w-5 h-5" />
                     </div>
                     <div className="font-bold text-sm text-white">Self-Learner</div>
@@ -372,7 +372,7 @@ export const OnboardingPage: React.FC = () => {
                     </p>
                   </div>
                   {educationLevel === 'self' && (
-                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-purple-400">
+                    <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold text-teal-400">
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Selected</span>
                     </div>
@@ -383,7 +383,7 @@ export const OnboardingPage: React.FC = () => {
               <div className="pt-4 flex justify-end">
                 <button
                   onClick={handleNextFromStep1}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs sm:text-sm font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center gap-2"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-4 h-4" />
@@ -643,7 +643,7 @@ export const OnboardingPage: React.FC = () => {
 
                 <button
                   onClick={handleNextFromStep2}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-600/25 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs sm:text-sm font-semibold shadow-lg shadow-teal-500/20 transition-all flex items-center gap-2"
                 >
                   <span>Select Subjects</span>
                   <ChevronRight className="w-4 h-4" />
@@ -666,7 +666,7 @@ export const OnboardingPage: React.FC = () => {
 
               {/* Suggested Subject Chips */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-300">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
                   Recommended Curriculum Subjects
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -679,8 +679,8 @@ export const OnboardingPage: React.FC = () => {
                         onClick={() => handleToggleSubject(sub)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                           isSelected
-                            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30 border border-indigo-400'
-                            : 'bg-slate-900 text-slate-300 border border-slate-800 hover:border-slate-700 hover:text-white'
+                            ? 'bg-teal-500 text-slate-950 font-semibold shadow-md shadow-teal-500/20 border border-teal-400'
+                            : 'bg-[#070b12] text-slate-300 border border-slate-800 hover:border-slate-700 hover:text-white'
                         }`}
                       >
                         {isSelected && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -693,7 +693,7 @@ export const OnboardingPage: React.FC = () => {
 
               {/* Add Custom Subject Form */}
               <form onSubmit={handleAddCustomSubject} className="space-y-2 pt-2">
-                <label className="block text-xs font-semibold text-slate-300">
+                <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
                   Add Custom Subject
                 </label>
                 <div className="flex gap-2">
@@ -702,7 +702,7 @@ export const OnboardingPage: React.FC = () => {
                     value={customSubjectInput}
                     onChange={e => setCustomSubjectInput(e.target.value)}
                     placeholder="e.g. Sanskrit, Robotics, Sanskriti, Discrete Math"
-                    className="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    className="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
                   />
                   <button
                     type="submit"
@@ -726,10 +726,10 @@ export const OnboardingPage: React.FC = () => {
                     No subjects selected yet. Please select at least one subject.
                   </div>
                 ) : (
-                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-wrap gap-2">
+                  <div className="p-3 rounded-xl bg-[#070b12] border border-slate-800 flex flex-wrap gap-2">
                     {selectedSubjects.map(sub => (
                       editingSubjectOriginal === sub ? (
-                        <div key={sub} className="flex items-center gap-1.5 p-1 rounded-lg bg-indigo-950 border border-indigo-500">
+                        <div key={sub} className="flex items-center gap-1.5 p-1 rounded-lg bg-teal-950/60 border border-teal-500">
                           <input
                             type="text"
                             value={renamedSubjectInput}
@@ -740,7 +740,7 @@ export const OnboardingPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleRenameSubject(sub)}
-                            className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-600 text-white rounded"
+                            className="px-2 py-0.5 text-[11px] font-semibold bg-teal-500 text-slate-950 rounded"
                           >
                             Save
                           </button>
@@ -755,7 +755,7 @@ export const OnboardingPage: React.FC = () => {
                       ) : (
                         <span
                           key={sub}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-200 text-xs border border-indigo-500/30"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-500/10 text-teal-300 text-xs border border-teal-500/25"
                         >
                           <span
                             onClick={() => {
@@ -791,7 +791,7 @@ export const OnboardingPage: React.FC = () => {
                   <select
                     value={difficultyLevel}
                     onChange={e => setDifficultyLevel(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-teal-500"
                   >
                     <option value="Beginner">Beginner (Foundations & Basics)</option>
                     <option value="Intermediate">Intermediate (Core Concepts & Practice)</option>
@@ -806,7 +806,7 @@ export const OnboardingPage: React.FC = () => {
                   <select
                     value={explanationStyle}
                     onChange={e => setExplanationStyle(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-teal-500"
                   >
                     <option value="Conceptual & Intuitive">Conceptual & Intuitive</option>
                     <option value="Step-by-Step Rigorous">Step-by-Step Rigorous</option>
@@ -829,7 +829,7 @@ export const OnboardingPage: React.FC = () => {
                 <button
                   onClick={handleSaveProfile}
                   disabled={isSaving || selectedSubjects.length === 0}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-sky-500 hover:from-emerald-500 hover:to-sky-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/25 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   {isSaving ? (
                     <span>Saving Profile...</span>

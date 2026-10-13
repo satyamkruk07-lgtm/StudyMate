@@ -81,13 +81,13 @@ export const WeeklyChart: React.FC = () => {
   }, [daysData]);
 
   return (
-    <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-sm flex flex-col justify-between">
+    <div className="p-5 rounded-2xl bg-[#0a0e17] border border-slate-800 shadow-sm flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
           <div>
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm text-white">Weekly Learning Progress</h3>
-              <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">
+              <span className="px-2 py-0.5 text-[11px] font-medium rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20 font-mono">
                 {dateRangeStr}
               </span>
             </div>
@@ -95,12 +95,12 @@ export const WeeklyChart: React.FC = () => {
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="text-right">
-              <div className="text-[11px] text-slate-400">Total Hours</div>
+              <div className="text-[11px] text-slate-400 font-mono">Total Hours</div>
               <div className="font-bold text-white font-mono">{totalWeeklyHours}h</div>
             </div>
             <div className="text-right">
-              <div className="text-[11px] text-slate-400">Avg Accuracy</div>
-              <div className="font-bold text-emerald-400 font-mono">{avgAccuracy}%</div>
+              <div className="text-[11px] text-slate-400 font-mono">Avg Accuracy</div>
+              <div className="font-bold text-teal-400 font-mono">{avgAccuracy}%</div>
             </div>
           </div>
         </div>
@@ -121,9 +121,9 @@ export const WeeklyChart: React.FC = () => {
                 {/* Tooltip on hover */}
                 {isHovered && (
                   <div className="absolute -top-16 z-20 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 shadow-xl text-center whitespace-nowrap pointer-events-none">
-                    <div className="text-[11px] font-bold text-white">{item.day} ({item.date.slice(5)})</div>
-                    <div className="text-[10px] text-sky-400">{item.hours}h studied • {item.questions} questions</div>
-                    <div className="text-[10px] text-emerald-400">{item.accuracy}% accuracy</div>
+                    <div className="text-[11px] font-bold text-white font-mono">{item.day} ({item.date.slice(5)})</div>
+                    <div className="text-[10px] text-teal-300 font-mono">{item.hours}h studied • {item.questions} questions</div>
+                    <div className="text-[10px] text-emerald-400 font-mono">{item.accuracy}% accuracy</div>
                   </div>
                 )}
 
@@ -132,7 +132,7 @@ export const WeeklyChart: React.FC = () => {
                   className={`text-[10px] mb-1 font-mono transition-opacity ${
                     item.hours > 0
                       ? isHovered
-                        ? 'text-indigo-300 font-bold opacity-100'
+                        ? 'text-teal-300 font-bold opacity-100'
                         : 'text-slate-400 opacity-90'
                       : 'text-slate-600 opacity-50'
                   }`}
@@ -146,8 +146,8 @@ export const WeeklyChart: React.FC = () => {
                     className={`w-full rounded-t-lg transition-all duration-300 ${
                       item.hours > 0
                         ? isHovered
-                          ? 'bg-gradient-to-t from-indigo-600 via-indigo-500 to-sky-400 shadow-lg shadow-indigo-500/30'
-                          : 'bg-gradient-to-t from-indigo-900/90 via-indigo-700 to-indigo-500'
+                          ? 'bg-gradient-to-t from-teal-600 via-teal-500 to-emerald-400 shadow-lg shadow-teal-500/20'
+                          : 'bg-gradient-to-t from-teal-900/90 via-teal-700 to-teal-500'
                         : 'bg-slate-800'
                     }`}
                     style={{ height: `${heightPercent}%` }}
@@ -156,8 +156,8 @@ export const WeeklyChart: React.FC = () => {
 
                 {/* Day label */}
                 <span
-                  className={`mt-2 text-xs font-medium transition-colors ${
-                    isHovered ? 'text-sky-300 font-bold' : item.hours > 0 ? 'text-slate-300' : 'text-slate-500'
+                  className={`mt-2 text-xs font-mono transition-colors ${
+                    isHovered ? 'text-teal-300 font-bold' : item.hours > 0 ? 'text-slate-300' : 'text-slate-500'
                   }`}
                 >
                   {item.day}

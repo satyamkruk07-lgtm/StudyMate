@@ -67,7 +67,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 bg-[#0a0f1d]/90 backdrop-blur-md border-b border-slate-800/80">
+      <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 bg-[#06090e]/85 backdrop-blur-md border-b border-slate-800/80">
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenSidebar}
@@ -82,7 +82,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
               <h1 className="text-base md:text-lg font-bold text-white tracking-tight">
                 {pageInfo.title}
               </h1>
-              <span className="hidden sm:inline-block text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-normal">
+              <span className="hidden sm:inline-block text-xs px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400 font-normal">
                 {pageInfo.desc}
               </span>
             </div>
@@ -95,9 +95,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
           {currentPage !== 'tutor' && (
             <button
               onClick={() => setCurrentPage('tutor')}
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-500/10 text-teal-300 border border-teal-500/20 hover:bg-teal-500/20 transition-all"
             >
-              <Bot className="w-3.5 h-3.5 text-indigo-400" />
+              <Bot className="w-3.5 h-3.5 text-teal-400" />
               <span>Ask Tutor</span>
             </button>
           )}
@@ -105,9 +105,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
           {currentPage !== 'quiz' && (
             <button
               onClick={() => setCurrentPage('quiz')}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/20 hover:bg-sky-500/20 transition-all"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600 transition-all"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <Sparkles className="w-3.5 h-3.5 text-teal-400" />
               <span>Adaptive Quiz</span>
             </button>
           )}
@@ -115,14 +115,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
           {/* Backend Engine Status Pill */}
           <button
             onClick={() => setIsConfigOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg bg-[#0a0e17] border border-slate-800 hover:border-slate-700 text-slate-300 transition-all"
             title="Inspect or configure Python FastAPI / In-Browser RAG Engine"
           >
-            <Server className="w-3.5 h-3.5 text-indigo-400" />
+            <Server className="w-3.5 h-3.5 text-teal-400" />
             <span className="hidden lg:inline font-mono text-[11px] text-slate-300">
               {apiMode === 'browser-mock' ? 'Mock RAG Engine' : 'FastAPI Connected'}
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
           </button>
 
         </div>
@@ -130,11 +130,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
 
       {/* Backend Integration & Hackathon Details Modal */}
       {isConfigOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg p-6 bg-[#0f172a] rounded-2xl border border-slate-700/80 shadow-2xl text-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg p-6 bg-[#0a0e17] rounded-2xl border border-slate-800 shadow-2xl text-slate-100">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20">
                   <Server className="w-5 h-5" />
                 </div>
                 <div>
@@ -156,7 +156,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
                   Track D Integration Status
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  The frontend is engineered with an isolated retrieval-grounding interface designed for immediate plug-and-play with a Python FastAPI backend (<code className="px-1 py-0.5 rounded bg-slate-800 text-sky-300">app.py</code>).
+                  The frontend is engineered with an isolated retrieval-grounding interface designed for immediate plug-and-play with a Python FastAPI backend (<code className="px-1 py-0.5 rounded bg-slate-800 text-teal-300">app.py</code>).
                 </p>
               </div>
 
@@ -169,7 +169,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
                     onClick={() => setApiMode('browser-mock')}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       apiMode === 'browser-mock'
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white font-medium shadow-sm'
+                        ? 'bg-teal-500/10 border-teal-500/40 text-white font-medium shadow-sm'
                         : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
@@ -181,7 +181,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
                     onClick={() => setApiMode('fastapi-connected')}
                     className={`p-3 rounded-xl border text-left transition-all ${
                       apiMode === 'fastapi-connected'
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white font-medium shadow-sm'
+                        ? 'bg-teal-500/10 border-teal-500/40 text-white font-medium shadow-sm'
                         : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
@@ -201,7 +201,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
                     value={apiEndpoint}
                     onChange={e => setApiEndpoint(e.target.value)}
                     placeholder="http://localhost:8000/api/v1"
-                    className="flex-1 px-3 py-2 text-xs font-mono rounded-lg bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:outline-none text-slate-200"
+                    className="flex-1 px-3 py-2 text-xs font-mono rounded-lg bg-slate-950 border border-slate-800 focus:border-teal-500 focus:outline-none text-slate-200"
                   />
                   <button
                     onClick={handleTestBackend}
@@ -214,11 +214,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
 
                 {testResult !== null && (
                   <div className={`mt-2 flex items-center gap-2 text-xs p-2.5 rounded-lg ${
-                    testResult ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                    testResult ? 'bg-teal-500/15 text-teal-300 border border-teal-500/30' : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                   }`}>
                     {testResult ? (
                       <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
                         <span>Connected successfully to FastAPI server!</span>
                       </>
                     ) : (
@@ -235,7 +235,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setIsConfigOpen(false)}
-                className="px-4 py-2 text-xs font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/20"
+                className="px-4 py-2 text-xs font-medium rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-semibold transition-all shadow-md shadow-teal-500/20"
               >
                 Apply & Close
               </button>

@@ -36,4 +36,7 @@ __pycache__/
 *.mp4
 *.webm
 *.mov
+!public/videos/*.mp4
+!public/videos/*.webm
+
 

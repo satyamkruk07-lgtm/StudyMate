@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1d] text-slate-100 flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col font-sans selection:bg-teal-500/20 selection:text-teal-200">
       {/* Sidebar Navigation */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -69,16 +69,16 @@ const AppContent: React.FC = () => {
         </main>
 
         {/* Global Footer */}
-        <footer className="border-t border-slate-800/80 px-6 py-4 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl w-full mx-auto">
+        <footer className="border-t border-slate-800/60 px-6 py-4 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl w-full mx-auto bg-[#070b12]/50">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-300">StudyMate AI</span>
-            <span>•</span>
+            <span className="font-semibold text-slate-200">StudyMate AI</span>
+            <span className="text-slate-600">•</span>
             <span>IIT Mandi Multimodal AI Hackathon 2026 (Track D)</span>
           </div>
           <div className="flex items-center gap-4 text-slate-400">
             <span>Adaptive Tutoring & Assessment</span>
-            <span>•</span>
-            <span className="text-emerald-400 font-mono">100% Source Grounded</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-teal-400 font-mono">100% Source Grounded</span>
           </div>
         </footer>
       </div>

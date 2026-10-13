@@ -67,10 +67,10 @@ export const RoadmapPage: React.FC = () => {
   return (
     <div className="space-y-6 pb-12">
       {/* Header */}
-      <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/25">
               {profile?.education_level === 'school'
                 ? `School Curriculum • ${profile.grade_or_course || 'Class 10'}`
                 : profile?.education_level === 'college'
@@ -93,8 +93,8 @@ export const RoadmapPage: React.FC = () => {
               onClick={() => setFilterCategory(cat)}
               className={`px-3 py-1.5 text-xs rounded-xl font-medium transition-colors ${
                 filterCategory === cat
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  ? 'bg-teal-500 text-slate-950 font-semibold'
+                  : 'bg-[#070b12] text-slate-400 hover:text-slate-200 border border-slate-800'
               }`}
             >
               {cat}
@@ -117,8 +117,8 @@ export const RoadmapPage: React.FC = () => {
                 onClick={() => setSelectedNode(node)}
                 className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
                   isSelected
-                    ? 'bg-gradient-to-r from-slate-900 via-[#10172c] to-[#0f172a] border-indigo-500 shadow-lg shadow-indigo-950/40 ring-1 ring-indigo-500/50'
-                    : 'bg-[#0f172a] border-slate-800 hover:border-slate-700'
+                    ? 'bg-[#0e1726] border-teal-500 shadow-lg shadow-teal-950/20 ring-1 ring-teal-500/50'
+                    : 'bg-[#0a0e17] border-slate-800/80 hover:border-slate-700'
                 }`}
               >
                 {/* Step indicator on the left */}
@@ -129,8 +129,8 @@ export const RoadmapPage: React.FC = () => {
                         node.status === 'completed'
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                           : node.status === 'in-progress'
-                          ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-                          : 'bg-slate-800 text-slate-500'
+                          ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
+                          : 'bg-slate-900 text-slate-500 border border-slate-800'
                       }`}
                     >
                       {index + 1}
@@ -139,7 +139,7 @@ export const RoadmapPage: React.FC = () => {
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-bold text-sm sm:text-base text-white">{node.title}</h3>
-                        <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
                           {node.category}
                         </span>
                       </div>
@@ -162,7 +162,7 @@ export const RoadmapPage: React.FC = () => {
                       prereqNodes.map((pr: RoadmapNode) => (
                         <span
                           key={pr.id}
-                          className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-sky-300 border border-slate-700/60"
+                          className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-teal-300 border border-slate-800"
                         >
                           ↳ {pr.title}
                         </span>
@@ -172,7 +172,7 @@ export const RoadmapPage: React.FC = () => {
 
                   <div className="flex items-center gap-3 text-slate-400 font-mono text-[11px]">
                     <span>{node.estimatedHours} hrs</span>
-                    <span className="text-indigo-400 font-bold">{node.masteryPercentage}% Mastery</span>
+                    <span className="text-teal-400 font-bold">{node.masteryPercentage}% Mastery</span>
                   </div>
                 </div>
               </div>
@@ -181,10 +181,10 @@ export const RoadmapPage: React.FC = () => {
         </div>
 
         {/* Selected Topic Inspector Drawer */}
-        <div className="p-6 rounded-3xl bg-[#0f172a] border border-slate-800 shadow-xl space-y-6 h-fit sticky top-20">
-          <div className="pb-4 border-b border-slate-800 space-y-2">
+        <div className="p-6 rounded-3xl bg-[#0a0e17] border border-slate-800/80 shadow-xl space-y-6 h-fit sticky top-20">
+          <div className="pb-4 border-b border-slate-800/80 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 text-sky-400 border border-slate-800">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-900 text-teal-400 border border-slate-800">
                 {selectedNode.category}
               </span>
               {getNodeStatusBadge(selectedNode.status)}
@@ -195,14 +195,14 @@ export const RoadmapPage: React.FC = () => {
 
           {/* Key Concepts */}
           <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+            <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500 block">
               Core Technical Competencies
             </span>
             <div className="flex flex-wrap gap-1.5">
               {selectedNode.keyConcepts.map((kc, idx) => (
                 <span
                   key={idx}
-                  className="px-2.5 py-1 rounded-lg text-xs bg-slate-900 text-slate-200 border border-slate-800"
+                  className="px-2.5 py-1 rounded-lg text-xs bg-[#070b12] text-slate-200 border border-slate-800"
                 >
                   ✓ {kc}
                 </span>
@@ -212,7 +212,7 @@ export const RoadmapPage: React.FC = () => {
 
           {/* Linked Learning Resources */}
           <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+            <span className="text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-500 block">
               Linked Verified Course Documents
             </span>
             <div className="space-y-2">
@@ -223,11 +223,11 @@ export const RoadmapPage: React.FC = () => {
                   <button
                     key={resId}
                     onClick={() => handleOpenLinkedResource(resId)}
-                    className="w-full p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-left flex items-center justify-between text-xs group"
+                    className="w-full p-2.5 rounded-xl bg-[#070b12] border border-slate-800 hover:border-slate-700 text-left flex items-center justify-between text-xs group"
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                      <span className="text-slate-200 truncate group-hover:text-indigo-300">{res.title}</span>
+                      <BookOpen className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                      <span className="text-slate-200 truncate group-hover:text-teal-300">{res.title}</span>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 shrink-0" />
                   </button>
@@ -237,14 +237,14 @@ export const RoadmapPage: React.FC = () => {
           </div>
 
           {/* Action Trigger */}
-          <div className="pt-4 border-t border-slate-800 space-y-2">
+          <div className="pt-4 border-t border-slate-800/80 space-y-2">
             <button
               onClick={() =>
                 launchQuizWithConfig({
                   topic: selectedNode.title.includes('Attention') ? 'Transformers & LLMs' : selectedNode.title
                 })
               }
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30 transition-all"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs shadow-md shadow-teal-500/20 transition-all"
             >
               <BrainCircuit className="w-4 h-4" />
               <span>Test Mastery with Quiz</span>
