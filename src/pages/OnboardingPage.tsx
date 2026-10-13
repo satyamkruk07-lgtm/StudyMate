@@ -50,7 +50,7 @@ const INDIAN_STATES = [
 ];
 
 export const OnboardingPage: React.FC = () => {
-  const { profile, saveProfile, setCurrentPage } = useStudy();
+  const { profile, saveProfile, setCurrentPage, logout } = useStudy();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [educationLevel, setEducationLevel] = useState<EducationLevel>(profile?.education_level || 'college');
@@ -249,12 +249,21 @@ export const OnboardingPage: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setCurrentPage('dashboard')}
-            className="text-xs text-slate-400 hover:text-white transition-colors"
-          >
-            {profile?.is_profile_completed ? 'Return to Dashboard' : 'Skip for now'}
-          </button>
+          {profile?.is_profile_completed ? (
+            <button
+              onClick={() => setCurrentPage('dashboard')}
+              className="text-xs text-slate-400 hover:text-white transition-colors"
+            >
+              Return to Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={logout}
+              className="text-xs text-slate-400 hover:text-rose-400 transition-colors"
+            >
+              Sign Out
+            </button>
+          )}
         </div>
 
         {/* Wizard Card Container */}

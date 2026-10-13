@@ -1,14 +1,14 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from .db import get_all_topic_mastery, get_all_attempts, get_all_documents
 
-def generate_personalized_recommendations() -> List[Dict[str, Any]]:
+def generate_personalized_recommendations(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Synthesizes pedagogical recommendations grounded strictly in the student's recorded attempt history.
     Does not invent fake prerequisite relationships when they are unverified.
     """
-    mastery_list = get_all_topic_mastery()
-    attempts = get_all_attempts()
-    docs = get_all_documents()
+    mastery_list = get_all_topic_mastery(user_id=user_id)
+    attempts = get_all_attempts(user_id=user_id)
+    docs = get_all_documents(user_id=user_id)
     recommendations = []
 
     # 1. Flag Weak Topics (Low Measured Mastery)

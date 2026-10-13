@@ -142,18 +142,18 @@ export const QuizPage: React.FC = () => {
         setQuizState('active');
         return;
       } catch (err: any) {
-        console.warn('Backend quiz generation failed, offering client fallback:', err);
-        setErrorMessage(
-          err.message || 'Quiz generation failed. Ensure documents are uploaded or Gemini API is reachable.'
-        );
-        // Do not immediately fail if client wants to use client questions
+        console.warn('Backend quiz generation failed, activating instant client fallback:', err);
+        setErrorMessage(null);
       }
     }
 
     // Client-side fallback if offline or backend generation was unavailable
     let pool = [...SAMPLE_QUESTIONS];
     if (selectedTopic !== 'All Topics') {
-      const topicMatches = pool.filter(q => q.topic.toLowerCase() === selectedTopic.toLowerCase());
+      const topicMatches = pool.filter(q => 
+        q.topic.toLowerCase().includes(selectedTopic.toLowerCase()) || 
+        selectedTopic.toLowerCase().includes(q.topic.toLowerCase())
+      );
       if (topicMatches.length > 0) pool = topicMatches;
     }
     if (selectedQuestionType !== 'all') {
@@ -163,8 +163,14 @@ export const QuizPage: React.FC = () => {
 
     const diffMatches = pool.filter(q => q.difficulty === selectedDifficulty);
     const chosen = diffMatches.length > 0 ? diffMatches : pool;
-    const clientQuestions = chosen.slice(0, questionCount).map((q, idx) => ({
-      id: q.id,
+
+    let selectedList = [...chosen];
+    while (selectedList.length < questionCount && chosen.length > 0) {
+      selectedList = [...selectedList, ...chosen];
+    }
+
+    const clientQuestions = selectedList.slice(0, questionCount).map((q, idx) => ({
+      id: `${q.id}-${idx}`,
       question_index: idx + 1,
       prompt: q.prompt,
       question_type: q.type,

@@ -22,13 +22,25 @@ import { useStudy } from '../context/StudyContext';
 import { EducationLevel } from '../types';
 
 export const HomePage: React.FC = () => {
-  const { setCurrentPage } = useStudy();
+  const { setCurrentPage, isAuthenticated, isProfileCompleted } = useStudy();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
   const handleStartPath = (level: EducationLevel) => {
     sessionStorage.setItem('studymate_selected_path', level);
-    setCurrentPage('signup');
+    if (isAuthenticated) {
+      setCurrentPage(isProfileCompleted ? 'dashboard' : 'onboarding');
+    } else {
+      setCurrentPage('signup');
+    }
+  };
+
+  const handleStartLearning = () => {
+    if (isAuthenticated) {
+      setCurrentPage(isProfileCompleted ? 'dashboard' : 'onboarding');
+    } else {
+      setCurrentPage('signup');
+    }
   };
 
   const scrollToSection = (id: string) => {
@@ -89,19 +101,31 @@ export const HomePage: React.FC = () => {
 
           {/* Action CTAs */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => setCurrentPage('login')}
-              className="px-4 py-2 text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => setCurrentPage('signup')}
-              className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={() => setCurrentPage(isProfileCompleted ? 'dashboard' : 'onboarding')}
+                className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30"
+              >
+                <span>Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => setCurrentPage('login')}
+                  className="px-4 py-2 text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setCurrentPage('signup')}
+                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-teal-500/20 transition-all hover:shadow-teal-500/30"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -136,18 +160,30 @@ export const HomePage: React.FC = () => {
               Learning Paths
             </button>
             <div className="pt-3 border-t border-slate-800 flex gap-2">
-              <button
-                onClick={() => setCurrentPage('login')}
-                className="flex-1 py-2 text-xs text-center font-medium text-slate-200 bg-slate-900 border border-slate-700/60 rounded-lg"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => setCurrentPage('signup')}
-                className="flex-1 py-2 text-xs text-center font-bold text-slate-950 bg-teal-500 rounded-lg"
-              >
-                Get Started
-              </button>
+              {isAuthenticated ? (
+                <button
+                  onClick={() => setCurrentPage(isProfileCompleted ? 'dashboard' : 'onboarding')}
+                  className="flex-1 py-2 text-xs text-center font-bold text-slate-950 bg-teal-400 rounded-lg flex items-center justify-center gap-1.5"
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setCurrentPage('login')}
+                    className="flex-1 py-2 text-xs text-center font-medium text-slate-200 bg-slate-900 border border-slate-700/60 rounded-lg"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage('signup')}
+                    className="flex-1 py-2 text-xs text-center font-bold text-slate-950 bg-teal-500 rounded-lg"
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -200,7 +236,7 @@ export const HomePage: React.FC = () => {
             {/* Primary & Secondary Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <button
-                onClick={() => setCurrentPage('signup')}
+                onClick={handleStartLearning}
                 className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm shadow-xl shadow-teal-500/20 hover:shadow-teal-500/35 transition-all transform hover:-translate-y-0.5"
               >
                 <span>Start Learning</span>

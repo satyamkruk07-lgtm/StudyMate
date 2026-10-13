@@ -20,8 +20,8 @@ class BM25Retriever:
         self.k1 = k1
         self.b = b
 
-    def retrieve(self, query: str, top_k: int = 4, score_threshold: float = 1.2, subject: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
-        chunks = get_all_searchable_chunks()
+    def retrieve(self, query: str, top_k: int = 4, score_threshold: float = 1.2, subject: Optional[str] = None, user_id: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
+        chunks = get_all_searchable_chunks(user_id=user_id)
         if not chunks:
             return [], False
 
@@ -101,6 +101,6 @@ class BM25Retriever:
 
 retriever = BM25Retriever()
 
-def search_relevant_chunks(query: str, top_k: int = 4, threshold: float = 1.0, subject: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
-    return retriever.retrieve(query, top_k=top_k, score_threshold=threshold, subject=subject)
+def search_relevant_chunks(query: str, top_k: int = 4, threshold: float = 1.0, subject: Optional[str] = None, user_id: Optional[str] = None) -> Tuple[List[Dict[str, Any]], bool]:
+    return retriever.retrieve(query, top_k=top_k, score_threshold=threshold, subject=subject, user_id=user_id)
 

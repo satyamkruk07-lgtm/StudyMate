@@ -53,7 +53,12 @@ def get_db_path() -> str:
 DB_PATH = get_db_path()
 
 def get_connection():
-    conn = sqlite3.connect(get_db_path())
+    conn = sqlite3.connect(get_db_path(), timeout=30.0)
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=30000")
+    except Exception:
+        pass
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -212,7 +217,8 @@ def init_db():
     # Topic mastery table (Bayesian / Beta-Binomial prior parameters)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS topic_mastery (
-        topic TEXT PRIMARY KEY,
+        id TEXT PRIMARY KEY,
+        topic TEXT NOT NULL,
         category TEXT DEFAULT 'Curriculum Module',
         alpha REAL DEFAULT 2.0,
         beta REAL DEFAULT 2.0,
@@ -221,7 +227,9 @@ def init_db():
         correct_attempts INTEGER DEFAULT 0,
         status TEXT DEFAULT 'insufficient_history',
         trend TEXT DEFAULT 'stable',
-        last_attempt_at TEXT
+        last_attempt_at TEXT,
+        subject TEXT,
+        user_id TEXT
     )
     """)
 
@@ -235,22 +243,67 @@ def init_db():
     safe_add_column("student_profiles", "difficulty_level TEXT DEFAULT 'intermediate'")
     safe_add_column("student_profiles", "explanation_style TEXT DEFAULT 'step-by-step'")
     safe_add_column("documents", "subject TEXT DEFAULT 'General'")
+    safe_add_column("documents", "user_id TEXT")
     safe_add_column("quizzes", "subject TEXT")
+    safe_add_column("quizzes", "user_id TEXT")
     safe_add_column("quiz_attempts", "subject TEXT")
     safe_add_column("quiz_attempts", "user_id TEXT")
     safe_add_column("topic_mastery", "subject TEXT")
+    safe_add_column("topic_mastery", "user_id TEXT")
+
+    # Migrate legacy single-user topic_mastery schema if id column is missing
+    try:
+        cursor.execute("PRAGMA table_info(topic_mastery)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if "id" not in columns:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS topic_mastery_new (
+                    id TEXT PRIMARY KEY,
+                    topic TEXT NOT NULL,
+                    category TEXT DEFAULT 'Curriculum Module',
+                    alpha REAL DEFAULT 2.0,
+                    beta REAL DEFAULT 2.0,
+                    mastery_percentage REAL DEFAULT 50.0,
+                    total_attempts INTEGER DEFAULT 0,
+                    correct_attempts INTEGER DEFAULT 0,
+                    status TEXT DEFAULT 'insufficient_history',
+                    trend TEXT DEFAULT 'stable',
+                    last_attempt_at TEXT,
+                    subject TEXT,
+                    user_id TEXT
+                )
+            """)
+            cursor.execute("""
+                INSERT OR IGNORE INTO topic_mastery_new (id, topic, category, alpha, beta, mastery_percentage, total_attempts, correct_attempts, status, trend, last_attempt_at, subject, user_id)
+                SELECT (topic || '_' || COALESCE(user_id, 'global')), topic, category, alpha, beta, mastery_percentage, total_attempts, correct_attempts, status, trend, last_attempt_at, subject, user_id
+                FROM topic_mastery
+            """)
+            cursor.execute("DROP TABLE topic_mastery")
+            cursor.execute("ALTER TABLE topic_mastery_new RENAME TO topic_mastery")
+    except Exception:
+        pass
+
+    try:
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_student_profiles_user_id ON student_profiles (user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents (user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_quizzes_user_id ON quizzes (user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON quiz_attempts (user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_topic_mastery_user_id ON topic_mastery (user_id)")
+        cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_topic_mastery_topic_user ON topic_mastery (topic, COALESCE(user_id, 'global'))")
+    except Exception:
+        pass
 
     conn.commit()
     conn.close()
 
 # --- Document Operations ---
 
-def insert_document(doc: Dict[str, Any]):
+def insert_document(doc: Dict[str, Any], user_id: Optional[str] = None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO documents (id, filename, file_type, file_size, title, topic, subject, upload_date, status, error_message, chunk_count, summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO documents (id, filename, file_type, file_size, title, topic, subject, upload_date, status, error_message, chunk_count, summary, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         doc["id"],
         doc["filename"],
@@ -263,15 +316,19 @@ def insert_document(doc: Dict[str, Any]):
         doc.get("status", "processing"),
         doc.get("error_message"),
         doc.get("chunk_count", 0),
-        doc.get("summary", "")
+        doc.get("summary", ""),
+        user_id or doc.get("user_id")
     ))
     conn.commit()
     conn.close()
 
-def update_document_subject(doc_id: str, subject: str):
+def update_document_subject(doc_id: str, subject: str, user_id: Optional[str] = None):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("UPDATE documents SET subject = ? WHERE id = ?", (subject.strip(), doc_id))
+    if user_id:
+        cursor.execute("UPDATE documents SET subject = ? WHERE id = ? AND (user_id = ? OR user_id IS NULL)", (subject.strip(), doc_id, user_id))
+    else:
+        cursor.execute("UPDATE documents SET subject = ? WHERE id = ?", (subject.strip(), doc_id))
     conn.commit()
     conn.close()
 
@@ -319,19 +376,25 @@ def insert_chunks(chunks: List[Dict[str, Any]]):
     conn.commit()
     conn.close()
 
-def get_all_documents() -> List[Dict[str, Any]]:
+def get_all_documents(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM documents ORDER BY upload_date DESC")
+    if user_id:
+        cursor.execute("SELECT * FROM documents WHERE (user_id = ? OR user_id IS NULL) ORDER BY upload_date DESC", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM documents ORDER BY upload_date DESC")
     rows = cursor.fetchall()
     docs = [dict(r) for r in rows]
     conn.close()
     return docs
 
-def get_document_by_id(doc_id: str) -> Optional[Dict[str, Any]]:
+def get_document_by_id(doc_id: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM documents WHERE id = ?", (doc_id,))
+    if user_id:
+        cursor.execute("SELECT * FROM documents WHERE id = ? AND (user_id = ? OR user_id IS NULL)", (doc_id, user_id))
+    else:
+        cursor.execute("SELECT * FROM documents WHERE id = ?", (doc_id,))
     row = cursor.fetchone()
     conn.close()
     if row:
@@ -357,9 +420,15 @@ def get_chunks_for_document(doc_id: str) -> List[Dict[str, Any]]:
     conn.close()
     return chunks
 
-def delete_document(doc_id: str) -> bool:
+def delete_document(doc_id: str, user_id: Optional[str] = None) -> bool:
     conn = get_connection()
     cursor = conn.cursor()
+    if user_id:
+        cursor.execute("SELECT id FROM documents WHERE id = ? AND (user_id = ? OR user_id IS NULL)", (doc_id, user_id))
+        if not cursor.fetchone():
+            conn.close()
+            return False
+
     cursor.execute("DELETE FROM document_chunks WHERE document_id = ?", (doc_id,))
     cursor.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
     deleted = cursor.rowcount > 0
@@ -367,16 +436,25 @@ def delete_document(doc_id: str) -> bool:
     conn.close()
     return deleted
 
-def get_all_searchable_chunks() -> List[Dict[str, Any]]:
+def get_all_searchable_chunks(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT c.id, c.document_id, c.chunk_index, c.location, c.page_or_slide, c.content, c.keywords,
-               d.filename, d.title, d.file_type, d.topic
-        FROM document_chunks c
-        JOIN documents d ON c.document_id = d.id
-        WHERE d.status = 'ready'
-    """)
+    if user_id:
+        cursor.execute("""
+            SELECT c.id, c.document_id, c.chunk_index, c.location, c.page_or_slide, c.content, c.keywords,
+                   d.filename, d.title, d.file_type, d.topic, d.subject
+            FROM document_chunks c
+            JOIN documents d ON c.document_id = d.id
+            WHERE d.status = 'ready' AND (d.user_id = ? OR d.user_id IS NULL)
+        """, (user_id,))
+    else:
+        cursor.execute("""
+            SELECT c.id, c.document_id, c.chunk_index, c.location, c.page_or_slide, c.content, c.keywords,
+                   d.filename, d.title, d.file_type, d.topic, d.subject
+            FROM document_chunks c
+            JOIN documents d ON c.document_id = d.id
+            WHERE d.status = 'ready'
+        """)
     rows = cursor.fetchall()
     chunks = []
     for r in rows:
@@ -394,12 +472,12 @@ def get_all_searchable_chunks() -> List[Dict[str, Any]]:
 
 # --- Quiz Storage Operations ---
 
-def insert_quiz(quiz: Dict[str, Any], questions: List[Dict[str, Any]]) -> str:
+def insert_quiz(quiz: Dict[str, Any], questions: List[Dict[str, Any]], user_id: Optional[str] = None) -> str:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO quizzes (id, title, topic, difficulty, question_count, document_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO quizzes (id, title, topic, difficulty, question_count, document_id, created_at, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         quiz["id"],
         quiz["title"],
@@ -407,7 +485,8 @@ def insert_quiz(quiz: Dict[str, Any], questions: List[Dict[str, Any]]) -> str:
         quiz["difficulty"],
         len(questions),
         quiz.get("document_id"),
-        quiz["created_at"]
+        quiz["created_at"],
+        user_id or quiz.get("user_id")
     ))
 
     cursor.executemany("""
@@ -441,19 +520,25 @@ def insert_quiz(quiz: Dict[str, Any], questions: List[Dict[str, Any]]) -> str:
     conn.close()
     return quiz["id"]
 
-def get_all_quizzes() -> List[Dict[str, Any]]:
+def get_all_quizzes(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM quizzes ORDER BY created_at DESC")
+    if user_id:
+        cursor.execute("SELECT * FROM quizzes WHERE (user_id = ? OR user_id IS NULL) ORDER BY created_at DESC", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM quizzes ORDER BY created_at DESC")
     rows = cursor.fetchall()
     quizzes = [dict(r) for r in rows]
     conn.close()
     return quizzes
 
-def get_quiz_by_id(quiz_id: str, include_answers: bool = False) -> Optional[Dict[str, Any]]:
+def get_quiz_by_id(quiz_id: str, include_answers: bool = False, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM quizzes WHERE id = ?", (quiz_id,))
+    if user_id:
+        cursor.execute("SELECT * FROM quizzes WHERE id = ? AND (user_id = ? OR user_id IS NULL)", (quiz_id, user_id))
+    else:
+        cursor.execute("SELECT * FROM quizzes WHERE id = ?", (quiz_id,))
     q_row = cursor.fetchone()
     if not q_row:
         conn.close()
@@ -484,12 +569,12 @@ def get_quiz_by_id(quiz_id: str, include_answers: bool = False) -> Optional[Dict
     conn.close()
     return quiz
 
-def record_quiz_attempt(attempt: Dict[str, Any], answer_results: List[Dict[str, Any]]):
+def record_quiz_attempt(attempt: Dict[str, Any], answer_results: List[Dict[str, Any]], user_id: Optional[str] = None):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO quiz_attempts (id, quiz_id, topic, difficulty, started_at, completed_at, total_questions, correct_answers, score_percentage, time_spent_seconds)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO quiz_attempts (id, quiz_id, topic, difficulty, started_at, completed_at, total_questions, correct_answers, score_percentage, time_spent_seconds, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         attempt["id"],
         attempt["quiz_id"],
@@ -500,7 +585,8 @@ def record_quiz_attempt(attempt: Dict[str, Any], answer_results: List[Dict[str, 
         attempt["total_questions"],
         attempt["correct_answers"],
         attempt["score_percentage"],
-        attempt["time_spent_seconds"]
+        attempt["time_spent_seconds"],
+        user_id or attempt.get("user_id")
     ))
 
     cursor.executemany("""
@@ -533,10 +619,13 @@ def record_quiz_attempt(attempt: Dict[str, Any], answer_results: List[Dict[str, 
     conn.commit()
     conn.close()
 
-def get_all_attempts() -> List[Dict[str, Any]]:
+def get_all_attempts(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM quiz_attempts ORDER BY completed_at DESC")
+    if user_id:
+        cursor.execute("SELECT * FROM quiz_attempts WHERE (user_id = ? OR user_id IS NULL) ORDER BY completed_at DESC", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM quiz_attempts ORDER BY completed_at DESC")
     rows = cursor.fetchall()
     attempts = []
     for r in rows:
@@ -550,52 +639,90 @@ def get_all_attempts() -> List[Dict[str, Any]]:
 
 # --- Topic Mastery Operations ---
 
-def get_all_topic_mastery() -> List[Dict[str, Any]]:
+def get_all_topic_mastery(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM topic_mastery ORDER BY mastery_percentage DESC")
+    if user_id:
+        cursor.execute("SELECT * FROM topic_mastery WHERE (user_id = ? OR user_id IS NULL) ORDER BY mastery_percentage DESC", (user_id,))
+    else:
+        cursor.execute("SELECT * FROM topic_mastery ORDER BY mastery_percentage DESC")
     rows = cursor.fetchall()
     results = [dict(r) for r in rows]
     conn.close()
     return results
 
-def get_mastery_for_topic(topic: str) -> Optional[Dict[str, Any]]:
+def get_mastery_for_topic(topic: str, user_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM topic_mastery WHERE LOWER(topic) = LOWER(?)", (topic.strip(),))
+    if user_id:
+        cursor.execute("SELECT * FROM topic_mastery WHERE LOWER(topic) = LOWER(?) AND (user_id = ? OR user_id IS NULL)", (topic.strip(), user_id))
+    else:
+        cursor.execute("SELECT * FROM topic_mastery WHERE LOWER(topic) = LOWER(?)", (topic.strip(),))
     row = cursor.fetchone()
     conn.close()
     if row:
         return dict(row)
     return None
 
-def upsert_topic_mastery(mastery: Dict[str, Any]):
+def upsert_topic_mastery(mastery: Dict[str, Any], user_id: Optional[str] = None):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO topic_mastery (topic, category, alpha, beta, mastery_percentage, total_attempts, correct_attempts, status, trend, last_attempt_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(topic) DO UPDATE SET
-            alpha = excluded.alpha,
-            beta = excluded.beta,
-            mastery_percentage = excluded.mastery_percentage,
-            total_attempts = excluded.total_attempts,
-            correct_attempts = excluded.correct_attempts,
-            status = excluded.status,
-            trend = excluded.trend,
-            last_attempt_at = excluded.last_attempt_at
-    """, (
-        mastery["topic"],
-        mastery.get("category", "Curriculum Module"),
-        mastery["alpha"],
-        mastery["beta"],
-        mastery["mastery_percentage"],
-        mastery["total_attempts"],
-        mastery["correct_attempts"],
-        mastery["status"],
-        mastery.get("trend", "stable"),
-        mastery.get("last_attempt_at")
-    ))
+    topic = mastery["topic"].strip()
+    uid = user_id or mastery.get("user_id")
+    mastery_id = f"{topic.lower()}_{uid or 'global'}"
+
+    # Check if entry exists for this topic & user
+    if uid:
+        cursor.execute("SELECT id FROM topic_mastery WHERE LOWER(topic) = LOWER(?) AND user_id = ?", (topic, uid))
+    else:
+        cursor.execute("SELECT id FROM topic_mastery WHERE LOWER(topic) = LOWER(?) AND (user_id IS NULL OR user_id = '')", (topic,))
+    existing = cursor.fetchone()
+
+    if existing:
+        if uid:
+            cursor.execute("""
+                UPDATE topic_mastery
+                SET category = ?, alpha = ?, beta = ?, mastery_percentage = ?,
+                    total_attempts = ?, correct_attempts = ?, status = ?, trend = ?, last_attempt_at = ?
+                WHERE LOWER(topic) = LOWER(?) AND user_id = ?
+            """, (
+                mastery.get("category", "Curriculum Module"),
+                mastery["alpha"], mastery["beta"], mastery["mastery_percentage"],
+                mastery["total_attempts"], mastery["correct_attempts"], mastery["status"],
+                mastery.get("trend", "stable"), mastery.get("last_attempt_at"),
+                topic, uid
+            ))
+        else:
+            cursor.execute("""
+                UPDATE topic_mastery
+                SET category = ?, alpha = ?, beta = ?, mastery_percentage = ?,
+                    total_attempts = ?, correct_attempts = ?, status = ?, trend = ?, last_attempt_at = ?
+                WHERE LOWER(topic) = LOWER(?) AND (user_id IS NULL OR user_id = '')
+            """, (
+                mastery.get("category", "Curriculum Module"),
+                mastery["alpha"], mastery["beta"], mastery["mastery_percentage"],
+                mastery["total_attempts"], mastery["correct_attempts"], mastery["status"],
+                mastery.get("trend", "stable"), mastery.get("last_attempt_at"),
+                topic
+            ))
+    else:
+        cursor.execute("""
+            INSERT OR REPLACE INTO topic_mastery (id, topic, category, alpha, beta, mastery_percentage, total_attempts, correct_attempts, status, trend, last_attempt_at, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            mastery_id,
+            topic,
+            mastery.get("category", "Curriculum Module"),
+            mastery["alpha"],
+            mastery["beta"],
+            mastery["mastery_percentage"],
+            mastery["total_attempts"],
+            mastery["correct_attempts"],
+            mastery["status"],
+            mastery.get("trend", "stable"),
+            mastery.get("last_attempt_at"),
+            uid
+        ))
     conn.commit()
     conn.close()
 
@@ -730,92 +857,134 @@ def get_student_profile(user_id: str) -> Optional[Dict[str, Any]]:
     except Exception:
         data["selected_subjects"] = []
     data["is_profile_completed"] = bool(data["is_profile_completed"])
-    data["difficulty_level"] = data.get("difficulty_level") or "intermediate"
-    data["explanation_style"] = data.get("explanation_style") or "step-by-step"
+    data["difficulty_level"] = data.get("difficulty_level") or "Intermediate"
+    data["explanation_style"] = data.get("explanation_style") or "Conceptual & Intuitive"
     return data
 
 def upsert_student_profile(user_id: str, profile_data: Dict[str, Any]) -> Dict[str, Any]:
     conn = get_connection()
     cursor = conn.cursor()
-
-    existing = get_student_profile(user_id) or {}
     now = datetime.utcnow().isoformat()
 
-    subjects_json = json.dumps(profile_data.get("selected_subjects", existing.get("selected_subjects", [])))
-    is_completed = 1 if profile_data.get("is_profile_completed", existing.get("is_profile_completed", True)) else 0
+    # Read existing record inside the same transaction
+    cursor.execute("SELECT * FROM student_profiles WHERE user_id = ?", (user_id,))
+    existing_row = cursor.fetchone()
+    existing = dict(existing_row) if existing_row else {}
+    if existing.get("selected_subjects") and isinstance(existing["selected_subjects"], str):
+        try:
+            existing["selected_subjects"] = json.loads(existing["selected_subjects"])
+        except Exception:
+            existing["selected_subjects"] = []
 
-    if profile_data.get("education_level") == "self":
-        resolved_grade = profile_data.get("grade_or_course") or "Self-Learner"
+    ed_level = profile_data.get("education_level", existing.get("education_level", "college"))
+
+    if ed_level == "self":
+        resolved_grade = (
+            profile_data.get("grade_or_course")
+            or profile_data.get("board_or_specialization")
+            or existing.get("grade_or_course")
+            or "Self-Learner"
+        )
     else:
         resolved_grade = (
             profile_data.get("grade_or_course")
             or existing.get("grade_or_course")
-            or "General"
+            or ("Class 11" if ed_level == "school" else "B.Tech")
         )
 
-    if existing and existing.get("id"):
-        cursor.execute("""
-            UPDATE student_profiles
-            SET education_level = ?,
-                grade_or_course = ?,
-                board_or_specialization = ?,
-                academic_year = ?,
-                semester = ?,
-                state = ?,
-                preferred_language = ?,
-                selected_subjects = ?,
-                learning_goals = ?,
-                difficulty_level = ?,
-                explanation_style = ?,
-                is_profile_completed = ?,
-                updated_at = ?
-            WHERE user_id = ?
-        """, (
-            profile_data.get("education_level", existing.get("education_level", "college")),
-            resolved_grade,
-            profile_data.get("board_or_specialization", existing.get("board_or_specialization")),
-            profile_data.get("academic_year", existing.get("academic_year")),
-            profile_data.get("semester", existing.get("semester")),
-            profile_data.get("state", existing.get("state")),
-            profile_data.get("preferred_language", existing.get("preferred_language", "English")),
-            subjects_json,
-            profile_data.get("learning_goals", existing.get("learning_goals")),
-            profile_data.get("difficulty_level", existing.get("difficulty_level", "intermediate")),
-            profile_data.get("explanation_style", existing.get("explanation_style", "step-by-step")),
-            is_completed,
-            now,
-            user_id
-        ))
-    else:
-        profile_id = f"prof_{uuid.uuid4().hex[:12]}"
-        cursor.execute("""
-            INSERT INTO student_profiles (
-                id, user_id, education_level, grade_or_course, board_or_specialization,
-                academic_year, semester, state, preferred_language, selected_subjects,
-                learning_goals, difficulty_level, explanation_style,
-                is_profile_completed, created_at, updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            profile_id,
-            user_id,
-            profile_data.get("education_level", "college"),
-            resolved_grade,
-            profile_data.get("board_or_specialization"),
-            profile_data.get("academic_year"),
-            profile_data.get("semester"),
-            profile_data.get("state"),
-            profile_data.get("preferred_language", "English"),
-            subjects_json,
-            profile_data.get("learning_goals"),
-            profile_data.get("difficulty_level", "intermediate"),
-            profile_data.get("explanation_style", "step-by-step"),
-            is_completed,
-            now,
-            now
-        ))
+    board_or_spec = profile_data.get("board_or_specialization", existing.get("board_or_specialization"))
+    academic_year = profile_data.get("academic_year", existing.get("academic_year"))
+    semester = profile_data.get("semester", existing.get("semester"))
+    state = profile_data.get("state", existing.get("state"))
+    pref_lang = profile_data.get("preferred_language", existing.get("preferred_language", "English"))
 
+    raw_subjects = profile_data.get("selected_subjects")
+    if raw_subjects is None:
+        raw_subjects = existing.get("selected_subjects", [])
+    if isinstance(raw_subjects, str):
+        try:
+            raw_subjects = json.loads(raw_subjects)
+        except Exception:
+            raw_subjects = [raw_subjects]
+    subjects_json = json.dumps(raw_subjects)
+
+    learning_goals = profile_data.get("learning_goals", existing.get("learning_goals"))
+    diff_level = profile_data.get("difficulty_level", existing.get("difficulty_level", "Intermediate"))
+    exp_style = profile_data.get("explanation_style", existing.get("explanation_style", "Conceptual & Intuitive"))
+
+    if "is_profile_completed" in profile_data and profile_data["is_profile_completed"] is not None:
+        is_completed = 1 if profile_data["is_profile_completed"] else 0
+    elif "is_profile_completed" in existing:
+        is_completed = 1 if existing["is_profile_completed"] else 0
+    else:
+        is_completed = 1
+
+    profile_id = existing.get("id") or f"prof_{uuid.uuid4().hex[:12]}"
+    created_at = existing.get("created_at") or now
+
+    cursor.execute("""
+        INSERT INTO student_profiles (
+            id, user_id, education_level, grade_or_course, board_or_specialization,
+            academic_year, semester, state, preferred_language, selected_subjects,
+            learning_goals, difficulty_level, explanation_style,
+            is_profile_completed, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+            education_level = excluded.education_level,
+            grade_or_course = excluded.grade_or_course,
+            board_or_specialization = excluded.board_or_specialization,
+            academic_year = excluded.academic_year,
+            semester = excluded.semester,
+            state = excluded.state,
+            preferred_language = excluded.preferred_language,
+            selected_subjects = excluded.selected_subjects,
+            learning_goals = excluded.learning_goals,
+            difficulty_level = excluded.difficulty_level,
+            explanation_style = excluded.explanation_style,
+            is_profile_completed = excluded.is_profile_completed,
+            updated_at = excluded.updated_at
+    """, (
+        profile_id,
+        user_id,
+        ed_level,
+        resolved_grade,
+        board_or_spec,
+        academic_year,
+        semester,
+        state,
+        pref_lang,
+        subjects_json,
+        learning_goals,
+        diff_level,
+        exp_style,
+        is_completed,
+        created_at,
+        now
+    ))
     conn.commit()
+
+    # Re-fetch within same connection
+    cursor.execute("""
+        SELECT id, user_id, education_level, grade_or_course, board_or_specialization,
+               academic_year, semester, state, preferred_language, selected_subjects,
+               learning_goals, difficulty_level, explanation_style,
+               is_profile_completed, created_at, updated_at
+        FROM student_profiles
+        WHERE user_id = ?
+    """, (user_id,))
+    final_row = cursor.fetchone()
     conn.close()
-    return get_student_profile(user_id)
+
+    if final_row:
+        data = dict(final_row)
+        try:
+            data["selected_subjects"] = json.loads(data["selected_subjects"])
+        except Exception:
+            data["selected_subjects"] = []
+        data["is_profile_completed"] = bool(data["is_profile_completed"])
+        data["difficulty_level"] = data.get("difficulty_level") or "Intermediate"
+        data["explanation_style"] = data.get("explanation_style") or "Conceptual & Intuitive"
+        return data
+    return {}
 

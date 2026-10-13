@@ -1,12 +1,27 @@
 import requests
 import json
 
-BASE = "http://localhost:8000"
+BASE = "http://127.0.0.1:8000"
 
 def test_full_quiz_flow():
     print("--- 1. Health check ---")
     r = requests.get(f"{BASE}/api/health")
     print(r.status_code, r.json())
+
+    # Authenticate user
+    reg = requests.post(f"{BASE}/api/auth/signup", json={
+        "name": "Quiz Flow Tester",
+        "email": "quiz_tester@studymate.ai",
+        "password": "Password123!"
+    })
+    token = reg.json().get("token")
+    if not token:
+        login = requests.post(f"{BASE}/api/auth/login", json={
+            "email": "quiz_tester@studymate.ai",
+            "password": "Password123!"
+        })
+        token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
 
     print("\n--- 2. Generate a Source-Grounded Quiz ---")
     gen_payload = {
@@ -15,7 +30,7 @@ def test_full_quiz_flow():
         "question_type": "all",
         "question_count": 3
     }
-    r = requests.post(f"{BASE}/api/quizzes/generate", json=gen_payload)
+    r = requests.post(f"{BASE}/api/quizzes/generate", json=gen_payload, headers=headers)
     print("Generate Status:", r.status_code)
     gen_data = r.json()
     if not gen_data.get("success"):
@@ -28,7 +43,7 @@ def test_full_quiz_flow():
     print(f"Total questions: {len(quiz['questions'])}")
 
     print("\n--- 3. Check Question Confidentiality Before Submission ---")
-    r_get = requests.get(f"{BASE}/api/quizzes/{quiz_id}")
+    r_get = requests.get(f"{BASE}/api/quizzes/{quiz_id}", headers=headers)
     first_q = r_get.json()["quiz"]["questions"][0]
     has_answer = "expected_answer" in first_q
     print(f"Is expected_answer hidden before submit? {not has_answer}")
@@ -52,8 +67,11 @@ def test_full_quiz_flow():
         "started_at": quiz["created_at"],
         "time_spent_seconds": 95
     }
-    r_sub = requests.post(f"{BASE}/api/quizzes/{quiz_id}/submit", json=sub_payload)
+    r_sub = requests.post(f"{BASE}/api/quizzes/{quiz_id}/submit", json=sub_payload, headers=headers)
     print("Submit Status:", r_sub.status_code)
+    if r_sub.status_code != 200:
+        print("Submit error body:", r_sub.text)
+        return
     sub_res = r_sub.json()["result"]
     print(f"Score: {sub_res['correct_answers']}/{sub_res['total_questions']} ({sub_res['score_percentage']}%)")
     for res in sub_res["question_results"]:
@@ -62,7 +80,7 @@ def test_full_quiz_flow():
         print(f"   Source: [{res['source_doc_name']}, {res['source_location']}]")
 
     print("\n--- 5. Verify Bayesian Mastery Updates ---")
-    r_mast = requests.get(f"{BASE}/api/mastery")
+    r_mast = requests.get(f"{BASE}/api/mastery", headers=headers)
     print("Mastery Status:", r_mast.status_code)
     m_data = r_mast.json()
     print("Overall Average Mastery:", m_data["mastery"]["overall_average"])
@@ -70,7 +88,7 @@ def test_full_quiz_flow():
         print(f" - Topic: {t['topic']} -> Mastery: {t['mastery_percentage']}% (Alpha: {t['alpha']}, Beta: {t['beta']}, Status: {t['status']})")
 
     print("\n--- 6. Verify Personalized Recommendations ---")
-    r_recs = requests.get(f"{BASE}/api/recommendations")
+    r_recs = requests.get(f"{BASE}/api/recommendations", headers=headers)
     print("Recommendations Status:", r_recs.status_code)
     recs = r_recs.json()["recommendations"]
     print(f"Total Recommendations: {len(recs)}")

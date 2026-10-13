@@ -1,6 +1,6 @@
 import math
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .db import (
     get_all_topic_mastery,
     get_mastery_for_topic,
@@ -13,13 +13,13 @@ MIN_ATTEMPTS_FOR_EVALUATION = 3
 WEAK_THRESHOLD = 60.0
 STRONG_THRESHOLD = 75.0
 
-def get_or_initialize_topic_mastery(topic: str) -> Dict[str, Any]:
+def get_or_initialize_topic_mastery(topic: str, user_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Retrieves existing mastery or initializes a new topic using a Bayesian Beta(2,2) prior.
     Does not assume prior mastery or zero mastery; starts with an explicit neutral prior.
     """
     clean_topic = topic.strip()
-    existing = get_mastery_for_topic(clean_topic)
+    existing = get_mastery_for_topic(clean_topic, user_id=user_id)
     if existing:
         return existing
 
@@ -33,16 +33,18 @@ def get_or_initialize_topic_mastery(topic: str) -> Dict[str, Any]:
         "correct_attempts": 0,
         "status": "insufficient_history",
         "trend": "stable",
-        "last_attempt_at": None
+        "last_attempt_at": None,
+        "user_id": user_id
     }
-    upsert_topic_mastery(initial)
+    upsert_topic_mastery(initial, user_id=user_id)
     return initial
 
 def update_mastery_for_question(
     topic: str,
     is_correct: bool,
     difficulty: str = "Intermediate",
-    timestamp: str = None
+    timestamp: str = None,
+    user_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Bayesian update rule:
@@ -50,7 +52,7 @@ def update_mastery_for_question(
     beta_{new}  = beta_{old}  + weight * (0 if correct else 1)
     Mastery E[theta] = alpha / (alpha + beta)
     """
-    current = get_or_initialize_topic_mastery(topic)
+    current = get_or_initialize_topic_mastery(topic, user_id=user_id)
     old_percentage = current["mastery_percentage"]
 
     # Difficulty weight ensures harder questions give slightly higher reinforcement
@@ -97,17 +99,18 @@ def update_mastery_for_question(
         "correct_attempts": new_correct,
         "status": status,
         "trend": trend,
-        "last_attempt_at": timestamp or datetime.utcnow().isoformat()
+        "last_attempt_at": timestamp or datetime.utcnow().isoformat(),
+        "user_id": user_id
     }
 
-    upsert_topic_mastery(updated)
+    upsert_topic_mastery(updated, user_id=user_id)
     return updated
 
-def get_mastery_overview() -> Dict[str, Any]:
+def get_mastery_overview(user_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Returns full topic-level mastery overview with statistical explainability.
     """
-    records = get_all_topic_mastery()
+    records = get_all_topic_mastery(user_id=user_id)
     strong = [r for r in records if r["status"] == "strong"]
     weak = [r for r in records if r["status"] == "weak"]
     developing = [r for r in records if r["status"] == "developing"]
