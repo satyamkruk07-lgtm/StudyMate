@@ -339,11 +339,16 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Test backend connection
   const testBackendConnection = useCallback(async (): Promise<boolean> => {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`${apiEndpoint}/api/health`, {
         method: 'GET',
-        signal: AbortSignal.timeout(3000)
+        signal: controller.signal
       });
-      return res.ok;
+      clearTimeout(timer);
+      if (!res.ok) return false;
+      const data = await res.json().catch(() => null);
+      return !!(data && data.status === 'ok');
     } catch {
       return false;
     }
@@ -355,12 +360,15 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const effectiveToken = activeToken !== undefined ? activeToken : token;
     try {
       setIsLoadingMaterials(true);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(`${apiEndpoint}/api/materials`, {
         headers: {
           ...(effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {})
         },
-        signal: AbortSignal.timeout(4000)
+        signal: controller.signal
       });
+      clearTimeout(timer);
       if (res.ok) {
         const data = await res.json();
         if (data.materials && Array.isArray(data.materials)) {
@@ -405,10 +413,13 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       setIsLoadingMastery(true);
       const authHeaders: Record<string, string> = effectiveToken ? { Authorization: `Bearer ${effectiveToken}` } : {};
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
       const [mRes, rRes] = await Promise.all([
-        fetch(`${apiEndpoint}/api/mastery`, { headers: authHeaders }),
-        fetch(`${apiEndpoint}/api/recommendations`, { headers: authHeaders })
+        fetch(`${apiEndpoint}/api/mastery`, { headers: authHeaders, signal: controller.signal }),
+        fetch(`${apiEndpoint}/api/recommendations`, { headers: authHeaders, signal: controller.signal })
       ]);
+      clearTimeout(timer);
 
       if (mRes.ok) {
         const mData = await mRes.json();
@@ -479,53 +490,75 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Check backend availability on mount and restore user session
   useEffect(() => {
     let isMounted = true;
-    testBackendConnection().then(async isOnline => {
-      if (!isMounted) return;
-      if (isOnline) {
-        setApiMode('fastapi-connected');
-
-        // Verify active token with backend
-        if (token) {
-          try {
-            const res = await fetch(`${apiEndpoint}/api/auth/me`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-              const data = await res.json();
-              if (data.user) {
-                setUser(data.user);
-                localStorage.setItem('studymate_user', JSON.stringify(data.user));
-              }
-              if (data.profile) {
-                setProfile(data.profile);
-                localStorage.setItem('studymate_profile', JSON.stringify(data.profile));
-              }
-              refreshMaterials(token);
-              refreshMasteryAndRecs(token);
-            } else {
-              // Token invalid or expired
-              setToken(null);
-              setUser(null);
-              setProfile(null);
-              localStorage.removeItem('studymate_token');
-              localStorage.removeItem('studymate_user');
-              localStorage.removeItem('studymate_profile');
-            }
-          } catch {
-            // Network or server error - keep local cache but log warning
-            console.warn('Network issue during auth verification.');
-          }
-        }
-      } else {
-        setApiMode('browser-mock');
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setIsAuthLoading(false);
       }
-      setIsAuthLoading(false);
-    });
+    }, 1200);
+
+    const initSession = async () => {
+      try {
+        const isOnline = await testBackendConnection();
+        if (!isMounted) return;
+
+        if (isOnline) {
+          setApiMode('fastapi-connected');
+          if (token) {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 2000);
+              const res = await fetch(`${apiEndpoint}/api/auth/me`, {
+                headers: { Authorization: `Bearer ${token}` },
+                signal: controller.signal
+              });
+              clearTimeout(timer);
+
+              if (res.ok) {
+                const data = await res.json();
+                if (data.user && isMounted) {
+                  setUser(data.user);
+                  localStorage.setItem('studymate_user', JSON.stringify(data.user));
+                }
+                if (data.profile && isMounted) {
+                  setProfile(data.profile);
+                  localStorage.setItem('studymate_profile', JSON.stringify(data.profile));
+                }
+                refreshMaterials(token);
+                refreshMasteryAndRecs(token);
+              } else if (res.status === 401) {
+                if (isMounted) {
+                  setToken(null);
+                  setUser(null);
+                  setProfile(null);
+                  localStorage.removeItem('studymate_token');
+                  localStorage.removeItem('studymate_user');
+                  localStorage.removeItem('studymate_profile');
+                }
+              }
+            } catch (authErr) {
+              console.warn('Network issue during auth verification:', authErr);
+            }
+          }
+        } else {
+          if (isMounted) setApiMode('browser-mock');
+        }
+      } catch (err) {
+        console.warn('Backend connection initialization failed:', err);
+      } finally {
+        clearTimeout(safetyTimer);
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
+      }
+    };
+
+    initSession();
 
     return () => {
       isMounted = false;
+      clearTimeout(safetyTimer);
     };
-  }, [testBackendConnection, apiEndpoint]);
+  }, [apiEndpoint]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.trim().toLowerCase();

@@ -34,27 +34,12 @@ const AppContent: React.FC = () => {
   } = useStudy();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // 1. Session initialization loading state - prevent private route flash
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col items-center justify-center font-sans selection:bg-teal-500/20">
-        <div className="relative flex items-center justify-center mb-4">
-          <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-teal-400 animate-spin" />
-          <div className="absolute w-2 h-2 rounded-full bg-teal-400" />
-        </div>
-        <p className="text-xs font-mono font-medium text-slate-400 tracking-wider uppercase">
-          Verifying StudyMate AI Session...
-        </p>
-      </div>
-    );
-  }
-
-  // 2. Public Homepage
+  // 1. Public Homepage - always renders immediately without blocking on auth loading
   if (currentPage === 'home') {
     return <HomePage />;
   }
 
-  // 3. Login Page
+  // 2. Login Page
   if (currentPage === 'login') {
     if (isAuthenticated) {
       if (isProfileCompleted) {
@@ -65,7 +50,7 @@ const AppContent: React.FC = () => {
     return <LoginPage />;
   }
 
-  // 4. Signup Page
+  // 3. Signup Page
   if (currentPage === 'signup') {
     if (isAuthenticated) {
       if (isProfileCompleted) {
@@ -76,8 +61,21 @@ const AppContent: React.FC = () => {
     return <SignupPage />;
   }
 
-  // 5. Onboarding Page (Requires active authentication)
+  // 4. Onboarding Page (Requires active authentication)
   if (currentPage === 'onboarding') {
+    if (isAuthLoading && !isAuthenticated) {
+      return (
+        <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col items-center justify-center font-sans selection:bg-teal-500/20">
+          <div className="relative flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-teal-400 animate-spin" />
+            <div className="absolute w-2 h-2 rounded-full bg-teal-400" />
+          </div>
+          <p className="text-xs font-mono font-medium text-slate-400 tracking-wider uppercase">
+            Verifying StudyMate AI Session...
+          </p>
+        </div>
+      );
+    }
     if (!isAuthenticated) {
       sessionStorage.setItem('studymate_return_url', 'onboarding');
       return <LoginPage />;
@@ -85,8 +83,23 @@ const AppContent: React.FC = () => {
     return <OnboardingPage />;
   }
 
-  // 6. Route Guard for Private / Protected Pages
+  // 5. Route Guard for Private / Protected Pages
   if (PROTECTED_PAGES.includes(currentPage)) {
+    // Only show loading spinner on protected routes if we are still verifying and user is not yet recognized in memory
+    if (isAuthLoading && !isAuthenticated) {
+      return (
+        <div className="min-h-screen bg-[#06090e] text-slate-100 flex flex-col items-center justify-center font-sans selection:bg-teal-500/20">
+          <div className="relative flex items-center justify-center mb-4">
+            <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-teal-400 animate-spin" />
+            <div className="absolute w-2 h-2 rounded-full bg-teal-400" />
+          </div>
+          <p className="text-xs font-mono font-medium text-slate-400 tracking-wider uppercase">
+            Verifying StudyMate AI Session...
+          </p>
+        </div>
+      );
+    }
+
     // Unauthenticated visitor trying to access protected route directly
     if (!isAuthenticated) {
       sessionStorage.setItem('studymate_return_url', currentPage);
