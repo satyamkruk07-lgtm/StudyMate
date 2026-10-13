@@ -12,7 +12,7 @@ import {
 import { useStudy } from '../context/StudyContext';
 
 export const LoginPage: React.FC = () => {
-  const { login, guestLogin, setCurrentPage } = useStudy();
+  const { login, setCurrentPage } = useStudy();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -122,37 +122,6 @@ export const LoginPage: React.FC = () => {
             )}
           </button>
         </form>
-
-        <div className="relative flex py-1 items-center">
-          <div className="flex-grow border-t border-slate-800"></div>
-          <span className="flex-shrink mx-3 text-[11px] text-slate-500 font-medium">Or demo instant access</span>
-          <div className="flex-grow border-t border-slate-800"></div>
-        </div>
-
-        {/* Quick Demo Access Options */}
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => guestLogin('school')}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/50 text-[11px] text-slate-300 hover:text-white transition-all text-center"
-          >
-            <div className="font-semibold">School</div>
-            <div className="text-[10px] text-slate-500">Class 10 CBSE</div>
-          </button>
-          <button
-            onClick={() => guestLogin('college')}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500/50 text-[11px] text-slate-300 hover:text-white transition-all text-center"
-          >
-            <div className="font-semibold text-sky-300">College</div>
-            <div className="text-[10px] text-slate-500">B.Tech 3rd Yr</div>
-          </button>
-          <button
-            onClick={() => guestLogin('self')}
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500/50 text-[11px] text-slate-300 hover:text-white transition-all text-center"
-          >
-            <div className="font-semibold">Self-Learner</div>
-            <div className="text-[10px] text-slate-500">AI & ML</div>
-          </button>
-        </div>
 
         <div className="pt-2 text-center text-xs text-slate-400">
           Don't have an account yet?{' '}

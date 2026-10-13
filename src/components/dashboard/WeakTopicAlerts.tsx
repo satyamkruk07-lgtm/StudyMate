@@ -7,6 +7,28 @@ export const WeakTopicAlerts: React.FC = () => {
 
   const weakTopics = masteryData.filter(m => m.status === 'weak');
 
+  if (masteryData.length === 0) {
+    return (
+      <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-sm flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white">No Topics Assessed Yet</h4>
+            <p className="text-xs text-slate-400">Complete an adaptive quiz on your study materials to calibrate topics.</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setCurrentPage('quiz')}
+          className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-md shadow-indigo-600/20"
+        >
+          Start Quiz
+        </button>
+      </div>
+    );
+  }
+
   if (weakTopics.length === 0) {
     return (
       <div className="p-5 rounded-2xl bg-[#0f172a] border border-slate-800 shadow-sm flex items-center justify-between">

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   PageId,
   LearningResource,
@@ -15,8 +15,6 @@ import {
   AuthUser,
   EducationLevel
 } from '../types';
-import { INITIAL_RESOURCES } from '../data/sampleResources';
-import { INITIAL_MASTERY_DATA, INITIAL_QUIZ_ATTEMPTS } from '../data/sampleMastery';
 
 const DEFAULT_API_BASE_URL = 
   import.meta.env.VITE_API_BASE_URL !== undefined 
@@ -192,13 +190,17 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [apiEndpoint, setApiEndpoint] = useState<string>(DEFAULT_API_BASE_URL);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(false);
 
-  // Resources state
+  // Resources state (clean persistent state, filters out any legacy mock data)
   const [resources, setResources] = useState<LearningResource[]>(() => {
     try {
       const saved = localStorage.getItem('studymate_resources');
-      return saved ? JSON.parse(saved) : INITIAL_RESOURCES;
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed)
+        ? parsed.filter((r: any) => r && !['res-1', 'res-2', 'res-3', 'res-4'].includes(r.id))
+        : [];
     } catch {
-      return INITIAL_RESOURCES;
+      return [];
     }
   });
 
@@ -216,22 +218,31 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isChatThinking, setIsChatThinking] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
 
-  // Client Quiz and Mastery fallbacks
+  // Real Database Quiz Attempts (no mock records, empty for new users)
   const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>(() => {
     try {
       const saved = localStorage.getItem('studymate_quiz_attempts');
-      return saved ? JSON.parse(saved) : INITIAL_QUIZ_ATTEMPTS;
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed)
+        ? parsed.filter((a: any) => a && !['att-1', 'att-2', 'att-3', 'att-4', 'att-5'].includes(a.id))
+        : [];
     } catch {
-      return INITIAL_QUIZ_ATTEMPTS;
+      return [];
     }
   });
 
+  // Real Bayesian Topic Mastery (no mock records, empty for new users)
   const [masteryData, setMasteryData] = useState<TopicMastery[]>(() => {
     try {
       const saved = localStorage.getItem('studymate_mastery');
-      return saved ? JSON.parse(saved) : INITIAL_MASTERY_DATA;
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return Array.isArray(parsed)
+        ? parsed.filter((m: any) => m && !['m-1', 'm-2', 'm-3', 'm-4', 'm-5', 'm-6'].includes(m.id))
+        : [];
     } catch {
-      return INITIAL_MASTERY_DATA;
+      return [];
     }
   });
 
@@ -243,9 +254,75 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [quizLauncherConfig, setQuizLauncherConfig] = useState<{ topic?: string; difficulty?: DifficultyLevel; document_id?: string } | null>(null);
 
-  // Stats
-  const [streakDays] = useState(6);
-  const [totalStudyHours] = useState(21.8);
+  // Real Telemetry: Computed from real attempts (0 for new users who haven't studied)
+  const allAttemptDates = useMemo(() => {
+    const dates = new Set<string>();
+    quizAttempts.forEach(a => {
+      const d = a.completedAt ? a.completedAt.slice(0, 10) : '';
+      if (d && d.match(/^\d{4}-\d{2}-\d{2}$/)) dates.add(d);
+    });
+    backendAttempts.forEach(a => {
+      const raw = a.completed_at || a.completedAt || '';
+      const d = raw.slice(0, 10);
+      if (d && d.match(/^\d{4}-\d{2}-\d{2}$/)) dates.add(d);
+    });
+    return Array.from(dates).sort();
+  }, [quizAttempts, backendAttempts]);
+
+  // Streak: Actual active study days (0 if new user who hasn't studied)
+  const streakDays = useMemo(() => {
+    if (allAttemptDates.length === 0) return 0;
+
+    const today = new Date();
+    const toISO = (d: Date) => d.toISOString().slice(0, 10);
+    const todayStr = toISO(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = toISO(yesterday);
+
+    const dateSet = new Set(allAttemptDates);
+
+    let checkDate: Date | null = null;
+    if (dateSet.has(todayStr)) {
+      checkDate = new Date(today);
+    } else if (dateSet.has(yesterdayStr)) {
+      checkDate = new Date(yesterday);
+    }
+
+    if (!checkDate) {
+      return allAttemptDates.length;
+    }
+
+    let streak = 0;
+    while (checkDate && dateSet.has(toISO(checkDate))) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    }
+
+    return Math.max(streak, 1);
+  }, [allAttemptDates]);
+
+  // Total Study Hours: Sum of real time_spent_seconds across authentic attempts
+  const totalStudyHours = useMemo(() => {
+    let totalSeconds = 0;
+    const seen = new Set<string>();
+
+    backendAttempts.forEach(a => {
+      if (a.id) seen.add(a.id);
+      totalSeconds += (a.time_spent_seconds || 0);
+    });
+
+    quizAttempts.forEach(a => {
+      if (!seen.has(a.id)) {
+        seen.add(a.id);
+        totalSeconds += (a.timeSpentSeconds || 0);
+      }
+    });
+
+    if (totalSeconds === 0) return 0.0;
+    const hours = totalSeconds / 3600;
+    return Math.max(0.1, Math.round(hours * 10) / 10);
+  }, [backendAttempts, quizAttempts]);
 
   // Test backend connection
   const testBackendConnection = useCallback(async (): Promise<boolean> => {
@@ -292,9 +369,10 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }))
           }));
 
-          if (backendMaterials.length > 0) {
-            setResources(backendMaterials);
-          }
+          setResources(backendMaterials);
+          try {
+            localStorage.setItem('studymate_resources', JSON.stringify(backendMaterials));
+          } catch {}
         }
       }
     } catch (e) {
@@ -318,9 +396,52 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const mData = await mRes.json();
         if (mData.mastery && Array.isArray(mData.mastery.topics)) {
           setBackendMastery(mData.mastery.topics);
+          const mappedMastery: TopicMastery[] = mData.mastery.topics.map((bm: any, idx: number) => ({
+            id: `bm-${bm.topic}-${idx}`,
+            topicName: bm.topic,
+            category: bm.category || 'Curriculum Module',
+            masteryPercentage: bm.mastery_percentage,
+            questionsAttempted: bm.total_attempts,
+            lastStudied: bm.last_attempt_at ? bm.last_attempt_at.slice(0, 10) : 'Recent',
+            status: bm.status,
+            recommendedAction:
+              bm.status === 'weak'
+                ? 'Review foundational concepts & take a remedial quiz'
+                : bm.status === 'strong'
+                ? 'Advance to higher difficulty practice'
+                : 'Practice regularly to maintain proficiency',
+            trend: bm.trend || 'stable'
+          }));
+          setMasteryData(mappedMastery);
+          try {
+            localStorage.setItem('studymate_mastery', JSON.stringify(mappedMastery));
+          } catch {}
         }
         if (mData.attempts && Array.isArray(mData.attempts)) {
           setBackendAttempts(mData.attempts);
+          const mappedAttempts: QuizAttempt[] = mData.attempts.map((att: any) => ({
+            id: att.id,
+            quizId: att.quiz_id || att.id,
+            topic: att.topic,
+            difficulty: (att.difficulty as DifficultyLevel) || 'Intermediate',
+            startedAt: att.started_at,
+            completedAt: att.completed_at ? att.completed_at.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            totalQuestions: att.total_questions,
+            correctAnswers: att.correct_answers,
+            scorePercentage: att.score_percentage,
+            timeSpentSeconds: att.time_spent_seconds || 60,
+            answers: (att.question_results || []).map((qr: any) => ({
+              questionId: qr.question_id,
+              userAnswer: qr.user_answer,
+              isCorrect: Boolean(qr.is_correct),
+              score: qr.score || (qr.is_correct ? 1 : 0),
+              feedback: qr.feedback || ''
+            }))
+          }));
+          setQuizAttempts(mappedAttempts);
+          try {
+            localStorage.setItem('studymate_quiz_attempts', JSON.stringify(mappedAttempts));
+          } catch {}
         }
       }
 

@@ -11,13 +11,14 @@ import {
 import { useStudy } from '../../context/StudyContext';
 
 export const StatCards: React.FC = () => {
-  const { masteryData, resources, quizAttempts, streakDays, totalStudyHours } = useStudy();
+  const { masteryData, resources, streakDays, totalStudyHours } = useStudy();
 
+  const totalTopics = masteryData.length;
   const strongTopics = masteryData.filter(m => m.status === 'strong').length;
   const weakTopics = masteryData.filter(m => m.status === 'weak').length;
-  const avgMastery = Math.round(
-    masteryData.reduce((acc, m) => acc + m.masteryPercentage, 0) / (masteryData.length || 1)
-  );
+  const avgMastery = totalTopics > 0
+    ? Math.round(masteryData.reduce((acc, m) => acc + m.masteryPercentage, 0) / totalTopics)
+    : 0;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -31,9 +32,13 @@ export const StatCards: React.FC = () => {
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <span className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">{avgMastery}%</span>
-          <span className="text-xs font-medium text-emerald-400 flex items-center gap-0.5">
-            <TrendingUp className="w-3 h-3" /> +4.2%
-          </span>
+          {totalTopics > 0 ? (
+            <span className="text-xs font-medium text-emerald-400 flex items-center gap-0.5">
+              <TrendingUp className="w-3 h-3" /> Live Bayesian
+            </span>
+          ) : (
+            <span className="text-xs text-slate-500 font-mono">Uncalibrated</span>
+          )}
         </div>
         <div className="mt-3 w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
           <div
@@ -41,7 +46,9 @@ export const StatCards: React.FC = () => {
             style={{ width: `${avgMastery}%` }}
           />
         </div>
-        <p className="mt-2 text-[11px] text-slate-400">Based on {masteryData.length} core course topics</p>
+        <p className="mt-2 text-[11px] text-slate-400">
+          {totalTopics > 0 ? `Based on ${totalTopics} core course topics` : 'Complete a quiz to initialize calibration'}
+        </p>
       </div>
 
       {/* 2. Topics Mastered */}
@@ -54,7 +61,7 @@ export const StatCards: React.FC = () => {
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <span className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-            {strongTopics} <span className="text-base font-normal text-slate-500">/ {masteryData.length}</span>
+            {strongTopics} <span className="text-base font-normal text-slate-500">/ {totalTopics}</span>
           </span>
           {weakTopics > 0 && (
             <span className="text-[11px] font-medium text-amber-400 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
@@ -64,24 +71,32 @@ export const StatCards: React.FC = () => {
         </div>
         <div className="mt-3 text-xs text-slate-400 flex items-center justify-between">
           <span>Target: 100% by finals</span>
-          <span className="font-semibold text-slate-300">{Math.round((strongTopics / (masteryData.length || 1)) * 100)}%</span>
+          <span className="font-semibold text-slate-300">
+            {totalTopics > 0 ? Math.round((strongTopics / totalTopics) * 100) : 0}%
+          </span>
         </div>
       </div>
 
-      {/* 3. Study Streak */}
+      {/* 3. Study Streak / Days Active */}
       <div className="p-4 rounded-2xl bg-[#0f172a] border border-slate-800 hover:border-slate-700/80 transition-all shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Study Streak</span>
           <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
-            <Flame className="w-4 h-4 fill-amber-400" />
+            <Flame className={`w-4 h-4 ${streakDays > 0 ? 'fill-amber-400 text-amber-400' : 'text-slate-500'}`} />
           </div>
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <span className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">{streakDays}</span>
-          <span className="text-xs font-medium text-amber-300">Days Active</span>
+          <span className="text-xs font-medium text-amber-300">
+            {streakDays === 1 ? 'Day Active' : 'Days Active'}
+          </span>
         </div>
         <p className="mt-3 text-xs text-slate-400">
-          Personal Best: <strong className="text-slate-200">14 days</strong>
+          {streakDays === 0
+            ? 'Start a quiz to begin tracking your streak'
+            : streakDays === 1
+            ? '1 active study day recorded'
+            : `${streakDays} days active study streak`}
         </p>
       </div>
 
@@ -95,11 +110,13 @@ export const StatCards: React.FC = () => {
         </div>
         <div className="mt-3 flex items-baseline gap-2">
           <span className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">{resources.length}</span>
-          <span className="text-xs text-slate-400">documents ({resources.reduce((sum, r) => sum + r.chunkCount, 0)} chunks)</span>
+          <span className="text-xs text-slate-400">
+            documents ({resources.reduce((sum, r) => sum + r.chunkCount, 0)} chunks)
+          </span>
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
           <Clock className="w-3.5 h-3.5 text-slate-400" />
-          <span>{totalStudyHours} hrs studied this week</span>
+          <span>{totalStudyHours.toFixed(1)} hrs studied total</span>
         </div>
       </div>
     </div>

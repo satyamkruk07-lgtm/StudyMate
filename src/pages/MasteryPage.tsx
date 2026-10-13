@@ -144,7 +144,7 @@ export const MasteryPage: React.FC = () => {
               </>
             ) : (
               <>
-                <strong className="text-amber-300">Displaying Demo Baseline Telemetry:</strong> Complete an adaptive quiz to initialize live Bayesian Beta-Binomial tracking on real course materials.
+                <strong className="text-sky-300">Live Bayesian Tracking Ready:</strong> Complete an adaptive quiz to initialize live Bayesian Beta-Binomial tracking on your course materials.
               </>
             )}
           </span>
@@ -363,7 +363,12 @@ export const MasteryPage: React.FC = () => {
 
         {/* List of topic progress bars */}
         <div className="space-y-3.5">
-          {filteredTopics.map(topic => (
+          {filteredTopics.length === 0 ? (
+            <div className="text-center py-10 rounded-xl bg-slate-900/40 border border-slate-800/80 text-xs text-slate-500">
+              No topics assessed yet. Upload learning materials and take an adaptive quiz to begin calibration.
+            </div>
+          ) : (
+            filteredTopics.map(topic => (
             <div
               key={topic.id}
               className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all space-y-2.5"
@@ -433,7 +438,7 @@ export const MasteryPage: React.FC = () => {
                 <span className="font-mono text-slate-300">{topic.masteryPercentage}% / 100%</span>
               </div>
             </div>
-          ))}
+          )))}
         </div>
       </div>
 

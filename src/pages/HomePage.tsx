@@ -20,10 +20,11 @@ import { useStudy } from '../context/StudyContext';
 import { EducationLevel } from '../types';
 
 export const HomePage: React.FC = () => {
-  const { setCurrentPage, guestLogin } = useStudy();
+  const { setCurrentPage } = useStudy();
 
   const handleStartPath = (level: EducationLevel) => {
-    guestLogin(level);
+    sessionStorage.setItem('studymate_selected_path', level);
+    setCurrentPage('signup');
   };
 
   const scrollToSection = (id: string) => {
@@ -140,12 +141,6 @@ export const HomePage: React.FC = () => {
               className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm transition-all"
             >
               <span>Explore Features</span>
-            </button>
-            <button
-              onClick={() => guestLogin('college')}
-              className="px-5 py-3.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium border border-slate-700/50 transition-all"
-            >
-              Try Instant Demo
             </button>
           </div>
 
@@ -580,12 +575,6 @@ export const HomePage: React.FC = () => {
                 >
                   <span>Get Started Now</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => guestLogin('college')}
-                  className="px-6 py-3.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700 text-sm font-semibold transition-all"
-                >
-                  Explore Demo Platform
                 </button>
               </div>
             </div>

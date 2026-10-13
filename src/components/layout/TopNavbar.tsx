@@ -4,7 +4,6 @@ import {
   Server,
   Sparkles,
   Bot,
-  RotateCcw,
   CheckCircle2,
   AlertCircle,
   HelpCircle,
@@ -65,12 +64,6 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
     setTesting(false);
   };
 
-  const handleResetData = () => {
-    if (window.confirm('Reset local demo data to default initial state?')) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
 
   return (
     <>
@@ -132,14 +125,6 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({ onOpenSidebar }) => {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </button>
 
-          {/* Reset Demo button */}
-          <button
-            onClick={handleResetData}
-            title="Reset demo data to default baseline"
-            className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
         </div>
       </header>
 
