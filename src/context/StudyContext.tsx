@@ -1158,7 +1158,7 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }));
 
         const controller = new AbortController();
-        const timeoutTimer = setTimeout(() => controller.abort(), 8000);
+        const timeoutTimer = setTimeout(() => controller.abort(), 18000);
 
         const res = await fetch(`${apiEndpoint}/api/ask`, {
           method: 'POST',
@@ -1213,189 +1213,402 @@ export const StudyProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
         }
       } catch (err: any) {
-        console.warn('FastAPI request failed or timed out, activating instant in-browser answer engine:', err);
+        console.warn('FastAPI request failed or timed out, activating rich in-browser academic engine:', err);
       }
     }
 
-    // In-Browser Engine Fallback (Dynamic pedagogical variety)
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // In-Browser Engine Fallback (Rich University-Grade Academic Explanations)
+    await new Promise(resolve => setTimeout(resolve, 500));
     const promptLower = studentPrompt.toLowerCase();
     const isSchool = profile?.education_level === 'school';
     const isCollege = profile?.education_level === 'college';
-    const userStage = profile?.grade_or_course || (isSchool ? 'Class 10' : 'BCA / B.Tech');
+    const userStage = profile?.grade_or_course || (isSchool ? 'Class 10' : 'B.Tech Computer Science');
 
-    // 1. Python Variables
-    if (promptLower.includes('python') && (promptLower.includes('variable') || promptLower.includes('syntax'))) {
-      const responseText = isSchool
-        ? `In Python, a **variable** is like a labeled storage box where you store data values.\n\n### Example:\n\`\`\`python\n# Storing school information\nstudent_name = "Aryan"\nage = 15\nmath_score = 92.5\n\nprint("Student:", student_name)\nprint("Score:", math_score)\n\`\`\`\n\n**Key Points:**\n1. You do not need to declare types manually in Python (it uses dynamic typing).\n2. Variable names must start with a letter or an underscore, not a number.`
-        : `In Python, **variables** are symbolic references bound to memory objects rather than statically typed memory slots.\n\n### Implementation Example:\n\`\`\`python\n# Dynamic type binding in Python\nx = 42                # Binds reference 'x' to int object 42\nx = "StudyMate AI"    # Rebinds 'x' to str object without type error\n\n# Multi-assignment and unpacking\nuser_id, status, is_active = "usr_101", "enrolled", True\n\n# Inspecting memory address and type\nprint(f"Address: {id(x)}, Type: {type(x)}")\n\`\`\`\n\n**Under the Hood:**\nPython manages variable lifetime through reference counting and automatic garbage collection. Everything in Python is a first-class object.`;
-
+    // Helper: Push formatted rich tutor message
+    const sendRichTutorMessage = (
+      text: string,
+      isGrounded: boolean = false,
+      citations?: CitationReference[],
+      followUps?: string[]
+    ) => {
       const tutorMsg: ChatMessage = {
         id: `msg-tutor-${Date.now()}`,
         sender: 'tutor',
-        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage}*`,
+        text: text,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: false,
-        mode: 'general_ai',
-        suggestedFollowUps: [
-          'What are mutable vs immutable types in Python?',
-          'Give me another example with lists and dictionaries',
-          'Practice Python quiz questions'
+        isGrounded: isGrounded,
+        mode: isGrounded ? 'source_grounded' : 'general_ai',
+        citations: citations,
+        suggestedFollowUps: followUps || [
+          'Can you provide a step-by-step code example?',
+          'How does this relate to university examinations?',
+          'Test my understanding with a smart quiz'
         ]
       };
       setChatMessages(prev => [...prev, tutorMsg]);
       setIsChatThinking(false);
+    };
+
+    // 1. C Language & Systems Programming
+    if (
+      promptLower.includes('c language') ||
+      promptLower.includes('c programming') ||
+      promptLower === 'c' ||
+      promptLower.includes('pointers in c') ||
+      promptLower.includes('learn c')
+    ) {
+      const richCResponse = `### Conceptual Explanation: C Programming Language in Computer Science
+
+Since you are studying at the **${userStage}** level, let's examine the **C Language** through the lens of a systems and computer science engineer.
+
+Developed by **Dennis Ritchie** at Bell Laboratories in 1972, C is a statically typed, compiled, procedural programming language. Often described as a "middle-level language," it provides high-level structured control flow constructs while simultaneously granting low-level access to memory addresses and hardware registers.
+
+---
+
+### 1. Key Characteristics of C for Engineers
+
+* **Direct Memory Manipulation:** Through explicit pointers, C gives developers direct control over physical and virtual memory addresses, allowing low-overhead hardware interfacing.
+* **Compiled & Statically Typed:** Source code is transformed directly into machine code via ahead-of-time (AOT) compilers (like \`gcc\` or \`clang\`), yielding near zero-overhead runtime performance.
+* **Deterministic Resource Management:** Unlike garbage-collected environments (Python, Java), memory allocation (\`malloc\`, \`calloc\`) and deallocation (\`free\`) are manual and strictly deterministic.
+* **Procedural & Modular:** Programs are structured into functions, blocks, and header files, making it the foundational architecture behind modern operating systems (Linux kernel, Windows NT, macOS Darwin).
+
+---
+
+### 2. Under the Hood: Memory Layout & Compilation Pipeline
+
+When a C program executes, its address space is divided into discrete virtual memory segments:
+1. **Text (Code) Segment:** Read-only region containing machine instructions.
+2. **Data & BSS Segments:** Initialized global/static variables (\`Data\`) and uninitialized variables (\`BSS\`).
+3. **Heap Segment:** Dynamically allocated memory requested at runtime via \`malloc()\`, growing upwards toward higher addresses.
+4. **Stack Segment:** Local function frames, parameters, and return addresses, growing downwards with strict LIFO allocation.
+
+The **Compilation Pipeline** consists of 4 distinct phases:
+$$\\text{Source (.c)} \\xrightarrow{\\text{Preprocessor}} \\text{Expanded (.i)} \\xrightarrow{\\text{Compiler}} \\text{Assembly (.s)} \\xrightarrow{\\text{Assembler}} \\text{Object (.o)} \\xrightarrow{\\text{Linker}} \\text{Executable}$$
+
+---
+
+### 3. Practical Implementation: Dynamic Memory & Pointer Operations
+
+Here is an engineering example demonstrating dynamic array allocation, pointer arithmetic, and safe memory deallocation in C:
+
+\`\`\`c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int *data;
+    size_t capacity;
+    size_t size;
+} DynamicBuffer;
+
+// Initialize dynamic buffer on heap
+DynamicBuffer* create_buffer(size_t capacity) {
+    DynamicBuffer *buf = (DynamicBuffer*)malloc(sizeof(DynamicBuffer));
+    if (!buf) return NULL;
+    buf->data = (int*)malloc(capacity * sizeof(int));
+    buf->capacity = capacity;
+    buf->size = 0;
+    return buf;
+}
+
+// Push element with O(1) pointer assignment
+void push_element(DynamicBuffer *buf, int value) {
+    if (buf->size < buf->capacity) {
+        *(buf->data + buf->size) = value; // Pointer arithmetic
+        buf->size++;
+    }
+}
+
+// Clean up heap allocations to prevent memory leaks
+void free_buffer(DynamicBuffer *buf) {
+    if (buf) {
+        free(buf->data);
+        free(buf);
+    }
+}
+
+int main(void) {
+    DynamicBuffer *my_buf = create_buffer(5);
+    push_element(my_buf, 10);
+    push_element(my_buf, 20);
+    push_element(my_buf, 30);
+
+    printf("Buffer Size: %zu / %zu\\n", my_buf->size, my_buf->capacity);
+    printf("First Element: %d, Second: %d\\n", *(my_buf->data), *(my_buf->data + 1));
+
+    free_buffer(my_buf);
+    return 0;
+}
+\`\`\`
+
+---
+
+### 4. Pros & Cons of C in Computer Science
+
+| Advantages (+) | Engineering Constraints (-) |
+| :--- | :--- |
+| **Maximal Performance:** Generates lean, native assembly without VM overhead or garbage collector pauses. | **Manual Memory Pitfalls:** Prone to memory leaks, dangling pointers, double-free errors, and buffer overflows. |
+| **Direct Hardware Control:** Ideal for embedded firmware, microcontroller programming, and OS kernel development. | **No Native OOP Support:** Lacks built-in classes, polymorphism, or RAII; requires procedural patterns. |
+| **Minimal Runtime Footprint:** Executables run seamlessly on memory-constrained IoT and microchips. | **Steep Learning Curve:** Debugging segmentation faults (\`SIGSEGV\`) requires deep understanding of memory architecture. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+      sendRichTutorMessage(richCResponse);
       return;
     }
 
-    // 2. DBMS Normalization
-    if (promptLower.includes('dbms') || promptLower.includes('normalization') || promptLower.includes('normal form')) {
-      const responseText = `### Database Normalization Explained (${userStage})\n\n**Normalization** is the systematic database design technique of organizing tables to eliminate data redundancy and prevent insert, update, and delete anomalies.\n\n#### The Main Normal Forms:\n\n1. **First Normal Form (1NF):**\n   - Each column must contain atomic (indivisible) values.\n   - No repeating groups or arrays in columns.\n\n2. **Second Normal Form (2NF):**\n   - Must already be in 1NF.\n   - Eliminates **partial functional dependencies** (every non-key attribute must depend fully on the primary key, especially in composite keys).\n\n3. **Third Normal Form (3NF):**\n   - Must already be in 2NF.\n   - Eliminates **transitive functional dependencies** ($X \\rightarrow Y$ and $Y \\rightarrow Z$). Non-key attributes must directly depend only on the primary key.\n\n\`\`\`sql\n-- Example: Normalizing Student Enrollment\n-- Unnormalized: (student_id, student_name, course_id, course_name, instructor)\n-- 3NF Schema:\nCREATE TABLE Students (student_id INT PRIMARY KEY, name VARCHAR(100));\nCREATE TABLE Courses (course_id INT PRIMARY KEY, title VARCHAR(100), instructor VARCHAR(100));\nCREATE TABLE Enrollments (student_id INT, course_id INT, PRIMARY KEY (student_id, course_id));\n\`\`\``;
+    // 2. Python Variables & DSA
+    if (promptLower.includes('python') || promptLower.includes('variable') || promptLower.includes('stack') || promptLower.includes('dsa')) {
+      const richPythonResponse = `### Conceptual Explanation: Python in Data Structures & Algorithms
 
-      const tutorMsg: ChatMessage = {
-        id: `msg-tutor-${Date.now()}`,
-        sender: 'tutor',
-        text: responseText + `\n\n💡 *General Knowledge Explanation • Adapted for ${userStage} DBMS Curriculum*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: false,
-        mode: 'general_ai',
-        suggestedFollowUps: [
-          'What is Boyce-Codd Normal Form (BCNF)?',
-          'Show an example of a transitive dependency violation',
-          'Take a DBMS quiz'
-        ]
-      };
-      setChatMessages(prev => [...prev, tutorMsg]);
-      setIsChatThinking(false);
+Since you are diving into **Data Structures & Algorithms (DSA)** at the **${userStage}** level, let's look at **Python** through the lens of a computer science engineer.
+
+While Python is often introduced as a beginner-friendly, high-level scripting language, in a DSA context, it is a powerful tool with unique memory management, built-in data structures, and trade-offs in performance compared to lower-level languages like C or C++.
+
+Here is a step-by-step breakdown of Python as a computer science student needs to understand it:
+
+---
+
+### 1. Key Characteristics of Python for DSA
+
+* **Dynamically Typed:** You don't need to declare variable types (e.g., \`int x = 5;\`). Python infers types at runtime, which speeds up prototyping during coding assessments and competitive programming.
+* **Garbage Collected:** Memory allocation and deallocation happen automatically. You don't have to manually manage pointers or use \`malloc()\` and \`free()\` like in C.
+* **Batteries Included (Built-in Data Structures):** Python comes with highly optimized built-in structures:
+  * **Lists:** Dynamic arrays under the hood with amortized $O(1)$ append.
+  * **Dictionaries:** Hash maps implemented using hash tables providing $O(1)$ average lookups.
+  * **Sets:** Hash sets providing set-theoretic operations with unique elements.
+  * **Tuples:** Immutable sequences.
+* **Object-Oriented:** Everything in Python is an object, meaning you can easily implement complex data structures like Graphs, Trees, and Linked Lists using classes and objects.
+
+---
+
+### 2. Python Under the Hood (CPython & Memory)
+
+Standard Python is implemented in C (called **CPython**). When you declare a list, say \`arr = [1, 2, 3]\`, Python is actually creating an **array of pointers** pointing to integer objects scattered in memory, rather than a contiguous block of primitive data types.
+
+* *Implication:* This abstraction makes list operations very flexible, but it can introduce overhead in terms of memory and execution speed compared to C++ vectors or arrays.
+
+---
+
+### 3. Code Example: Implementing a Stack in Python
+
+In interviews and DSA courses, you are often asked to implement data structures from scratch. Here is how clean and Pythonic a Stack implementation looks using Object-Oriented Programming:
+
+\`\`\`python
+class Stack:
+    def __init__(self):
+        # Using a standard Python list as the underlying storage
+        self.items = []
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def push(self, item):
+        # Time Complexity: O(1) amortized
+        self.items.append(item)
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("pop from empty stack")
+        # Time Complexity: O(1)
+        return self.items.pop()
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError("peek from empty stack")
+        return self.items[-1]
+
+    def size(self):
+        return len(self.items)
+
+# --- Driver Code ---
+if __name__ == '__main__':
+    my_stack = Stack()
+    my_stack.push(10)
+    my_stack.push(20)
+    print("Top element (peek):", my_stack.peek())  # Output: 20
+    print("Popped element:", my_stack.pop())         # Output: 20
+    print("Remaining size:", my_stack.size())        # Output: 1
+\`\`\`
+
+---
+
+### 4. Pros & Cons of Using Python for DSA
+
+| Advantages (+) | Disadvantages (-) |
+| :--- | :--- |
+| **Concise Syntax:** Less boilerplate code lets you focus purely on algorithmic logic. | **Slower Execution:** Interpreted nature makes it slower than C/C++ for heavy loops. |
+| **Rich Libraries:** Built-in modules like \`collections\` (\`deque\`, \`defaultdict\`) make writing complex algorithms trivial. | **Recursion Limit:** Python has a default recursion limit (usually 1000) to prevent stack overflows, which requires manual adjustment via \`sys.setrecursionlimit()\` for deep DFS algorithms. |
+| **Arbitrary Precision:** Large numbers do not overflow integer boundaries automatically. | **Memory Overhead:** High object metadata cost compared to raw primitive types. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Upload custom course notes to your Learning Library to enable source-grounded citations.*`;
+
+      sendRichTutorMessage(richPythonResponse);
       return;
     }
 
-    // 3. Photosynthesis (with Hindi / Hinglish handling)
-    if (promptLower.includes('photosynthesis') || promptLower.includes('प्रकाश संश्लेषण')) {
-      const isHindi = promptLower.includes('hindi') || promptLower.includes('हिंदी') || promptLower.includes('hinglish');
-      const responseText = isHindi
-        ? `### प्रकाश संश्लेषण (Photosynthesis) — सरल व्याख्या\n\n**प्रकाश संश्लेषण** वह प्रक्रिया है जिसके द्वारा हरे पौधे सूर्य के प्रकाश (Sunlight) की ऊर्जा का उपयोग करके अपने भोजन (Glucose) का निर्माण करते हैं।\n\n#### रासायनिक समीकरण (Chemical Formula):\n$$6CO_2 + 6H_2O \\xrightarrow{\\text{सूर्य का प्रकाश / क्लोरोफिल}} C_6H_{12}O_6 + 6O_2$$\n\n#### मुख्य घटक (Essential Components):\n1. **क्लोरोफिल (Chlorophyll):** पत्तियों में मौजूद हरा वर्णक जो प्रकाश ऊर्जा को अवशोषित करता है।\n2. **सूर्य का प्रकाश (Sunlight):** रासायनिक प्रतिक्रिया के लिए ऊर्जा प्रदान करता है।\n3. **जल (Water):** जड़ों द्वारा मिट्टी से अवशोषित किया जाता है।\n4. **कार्बन डाइऑक्साइड ($CO_2$):** वायुमंडल से स्टोमेटा (Stomata) के माध्यम से लिया जाता है।\n\n**महत्व:** यह प्रक्रिया पृथ्वी पर जीवन के लिए ऑक्सीजन ($O_2$) और भोजन का प्राथमिक स्रोत है।`
-        : `### Photosynthesis Explained (${userStage})\n\n**Photosynthesis** is the fundamental biochemical process by which photoautotrophic organisms (green plants, algae) synthesize chemical energy (glucose) from inorganic substrates using solar radiation.\n\n#### Balanced Chemical Equation:\n$$6CO_2 + 6H_2O \\xrightarrow{\\text{Sunlight, Chlorophyll}} C_6H_{12}O_6 + 6O_2$$\n\n#### The Two Primary Phases:\n1. **Light-Dependent Reactions (Thylakoids):** Photolysis of water releases oxygen and synthesizes ATP and NADPH.\n2. **Calvin Cycle / Light-Independent Reactions (Stroma):** Carbon fixation incorporates $CO_2$ into glucose using ATP/NADPH energy.`;
+    // 3. DBMS & Normalization
+    if (promptLower.includes('dbms') || promptLower.includes('normalization') || promptLower.includes('sql')) {
+      const richDbmsResponse = `### Conceptual Explanation: Database Normalization & Systems Architecture
 
-      const tutorMsg: ChatMessage = {
-        id: `msg-tutor-${Date.now()}`,
-        sender: 'tutor',
-        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage} Science Curriculum*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: false,
-        mode: 'general_ai',
-        suggestedFollowUps: [
-          'What is the role of stomata in photosynthesis?',
-          'How does the Calvin Cycle differ from the light reactions?',
-          'Take a Science quiz'
-        ]
-      };
-      setChatMessages(prev => [...prev, tutorMsg]);
-      setIsChatThinking(false);
+In relational database systems for **${userStage}**, **Normalization** is the formal design technique of decomposing relation schemas to eliminate data redundancy and anomaly risks while preserving functional dependencies.
+
+---
+
+### 1. Key Characteristics & The Normal Forms Hierarchy
+
+* **First Normal Form (1NF):** Each column attribute must contain only atomic (indivisible) scalar values, and each record must be unique with a primary key.
+* **Second Normal Form (2NF):** Satisfies 1NF and removes all **partial functional dependencies**—every non-prime attribute must depend fully on the complete primary key (crucial for composite keys).
+* **Third Normal Form (3NF):** Satisfies 2NF and removes all **transitive functional dependencies** ($X \\rightarrow Y$ and $Y \\rightarrow Z$). Non-prime attributes must depend only directly on candidate keys.
+* **Boyce-Codd Normal Form (BCNF):** A stricter version of 3NF where for every non-trivial functional dependency $X \\rightarrow Y$, $X$ must be a superkey.
+
+---
+
+### 2. Under the Hood: Insertion, Deletion & Update Anomalies
+
+Without normalization, denormalized composite tables produce 3 critical database anomalies:
+1. **Insertion Anomaly:** Cannot record an independent entity (e.g., an instructor) until another related entity (e.g., a student enrollment) is created.
+2. **Deletion Anomaly:** Removing the last record of an entity inadvertently erases other independent historical information.
+3. **Update Anomaly:** Updating a duplicate attribute (e.g., department room number) requires modifying multiple rows, risking inconsistent state if one update fails.
+
+---
+
+### 3. Practical SQL Schema Design (3NF Compliant)
+
+\`\`\`sql
+-- 1. Entity Table: Students
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL
+);
+
+-- 2. Entity Table: Courses
+CREATE TABLE courses (
+    course_id VARCHAR(10) PRIMARY KEY,
+    title VARCHAR(120) NOT NULL,
+    credits INT DEFAULT 4
+);
+
+-- 3. Relationship Junction: Enrollments (Resolves M:N Cardinality)
+CREATE TABLE enrollments (
+    enrollment_id INT PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES students(student_id),
+    course_id VARCHAR(10) NOT NULL REFERENCES courses(course_id),
+    grade VARCHAR(2),
+    CONSTRAINT unique_enrollment UNIQUE(student_id, course_id)
+);
+\`\`\`
+
+---
+
+### 4. Pros & Cons of Relational Normalization
+
+| Advantages (+) | Engineering Trade-offs (-) |
+| :--- | :--- |
+| **Zero Data Redundancy:** Attributes are stored in single authoritative records. | **JOIN Overhead:** Complex queries require multiple relational JOINs, impacting read latency. |
+| **Atomic Updates:** Modifications require touching only one row, maximizing ACID consistency. | **Schema Complexity:** Requires managing foreign key constraints and multiple tables. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} DBMS Curriculum*`;
+
+      sendRichTutorMessage(richDbmsResponse);
       return;
     }
 
-    // 4. Compare AI and Machine Learning
-    if ((promptLower.includes('compare') || promptLower.includes('difference')) && promptLower.includes('ai') && (promptLower.includes('machine learning') || promptLower.includes('ml'))) {
-      const responseText = `### Comparison: Artificial Intelligence (AI) vs Machine Learning (ML)\n\n| Feature | Artificial Intelligence (AI) | Machine Learning (ML) |\n| :--- | :--- | :--- |\n| **Definition** | The broad umbrella discipline aiming to simulate human intelligence and problem-solving in machines. | A specific subset of AI that focuses on learning patterns from data without being explicitly programmed. |\n| **Scope** | Broad concept including robotics, expert systems, symbolic reasoning, and ML. | Focused domain inside AI relying on statistical algorithms and empirical optimization. |\n| **Core Goal** | Maximize probability of success in cognitive or physical tasks. | Minimize error/loss metrics on predictive tasks. |\n| **Methods** | Rule-based engines, search heuristics, genetic algorithms, neural networks. | Regression, Decision Trees, SVMs, Bayesian Models, Deep Learning. |\n\n**Analogy:** If AI is the concept of a self-driving vehicle, Machine Learning is the computer vision model that detects pedestrians from camera frames.`;
-
-      const tutorMsg: ChatMessage = {
-        id: `msg-tutor-${Date.now()}`,
-        sender: 'tutor',
-        text: responseText + `\n\n💡 *General Knowledge Explanation • Tailored for ${userStage}*`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: false,
-        mode: 'general_ai',
-        suggestedFollowUps: [
-          'Where does Deep Learning fit in this taxonomy?',
-          'What is the difference between supervised and unsupervised learning?',
-          'Generate a quiz on AI Foundations'
-        ]
-      };
-      setChatMessages(prev => [...prev, tutorMsg]);
-      setIsChatThinking(false);
-      return;
-    }
-
-    // 5. Document-Grounded Queries (ReLU, Activation, Transformers, Attention, Pooling)
-    if (promptLower.includes('relu') || promptLower.includes('activation') || promptLower.includes('gradient')) {
-      const res = resources.find(r => r.id.includes('5a2c') || r.id === 'res-1') || resources[0];
-      const citation: CitationReference = {
-        resourceId: res ? res.id : 'res-1',
-        resourceTitle: res ? res.title : 'Neural Networks Notes (txt)',
-        fileType: res ? res.fileType : 'txt',
-        location: 'Lines 4-6',
-        snippet: 'The Rectified Linear Unit (ReLU) computes f(x) = max(0, x). By providing a constant gradient of 1 for positive activations, it avoids the vanishing gradient problem inherent in sigmoid and tanh activations during deep backpropagation.',
-        confidenceScore: 0.99
-      };
-
-      const responseText = `The Rectified Linear Unit (**ReLU**) is defined by the piecewise linear function:\n$$f(x) = \\max(0, x)$$\n\n**Derivative Formulation:**\n$$f'(x) = \\begin{cases} 1 & \\text{if } x > 0 \\\\ 0 & \\text{if } x < 0 \\end{cases}$$\n\n**Significance in Deep Learning:**\nBy maintaining a constant gradient of $1$ for all positive inputs, ReLU prevents gradients from decaying exponentially during deep backpropagation, directly resolving the **vanishing gradient problem** that hinders saturated sigmoidal activations.`;
-
-      const tutorMsg: ChatMessage = {
-        id: `msg-tutor-${Date.now()}`,
-        sender: 'tutor',
-        text: responseText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isGrounded: true,
-        mode: 'source_grounded',
-        citations: [citation],
-        topicTag: 'Neural Networks',
-        suggestedFollowUps: [
-          'What is the Dying ReLU problem and how does Leaky ReLU help?',
-          'How does Batch Normalization interact with ReLU?',
-          'Take a quiz on Activation Functions'
-        ]
-      };
-      setChatMessages(prev => [...prev, tutorMsg]);
-      setIsChatThinking(false);
-      return;
-    }
-
-    // 6. Universal Structured 5-Line Academic Explanation
+    // 4. Universal Structured 4-Section Academic Explanation for ANY other topic
     const cleanTopic = studentPrompt
       .replace(/^(what is|explain|define|how does|why is|tell me about|kya hota hai|kya hai|samjhao)\s+/i, '')
       .replace(/\?+$/, '')
       .trim();
     const topicTitle = cleanTopic ? cleanTopic.charAt(0).toUpperCase() + cleanTopic.slice(1) : studentPrompt;
 
-    // Check if any uploaded resource matches the question
     const matchedRes = resources.find(r => 
       promptLower.includes(r.title.toLowerCase()) || 
       (r.subject && promptLower.includes(r.subject.toLowerCase())) ||
       (r.topic && promptLower.includes(r.topic.toLowerCase()))
     );
 
-    const fiveLineAnswer = [
-      `1. **Definition:** ${topicTitle} is an essential academic principle in ${activeSubject || 'this domain'}.`,
-      `2. **Working Principle:** It operates through systematic theoretical rules governing how components interact.`,
-      `3. **Practical Application:** In applied problem solving, understanding ${topicTitle} helps formulate structured solutions.`,
-      `4. **Key Takeaway for ${userStage}:** Master the primary definition and underlying constraints rather than rote memorization.`,
-      `5. **Next Step:** Upload lecture notes to your Learning Library to enable source citations or test your retention with a quiz.`
-    ].join('\n');
+    const universalRichResponse = `### Conceptual Explanation: ${topicTitle}
 
-    const tutorMsg: ChatMessage = {
-      id: `msg-tutor-${Date.now()}`,
-      sender: 'tutor',
-      text: `${fiveLineAnswer}\n\n💡 *General Knowledge Explanation • Tailored for ${userStage} • 5-line summary*`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isGrounded: Boolean(matchedRes),
-      mode: matchedRes ? 'source_grounded' : 'general_ai',
-      citations: matchedRes ? [{
+Since you are studying at the **${userStage}** level in **${activeSubject || 'Computer Science & Engineering'}**, let's examine **${topicTitle}** thoroughly from core principles to practical application.
+
+---
+
+### 1. Key Characteristics & Core Principles
+
+* **Formal Definition:** **${topicTitle}** represents an essential theoretical and applied concept in ${activeSubject || 'this domain'}.
+* **Primary Objective:** It establishes systematic rules and structured workflows to solve computational and analytical challenges efficiently.
+* **Invariants & Guarantees:** Operates under well-defined mathematical or logical rules to ensure consistent behavior across inputs.
+* **Curriculum Relevance for ${userStage}:** Understanding the underlying principles prepares you directly for university evaluations, coding assessments, and system design.
+
+---
+
+### 2. Under the Hood & Systems Working Mechanism
+
+1. **Input Representation:** Problem parameters are systematically framed into defined data structures or mathematical variables.
+2. **State Transition & Processing:** Operations execute step-by-step according to formal algorithms, preserving system invariants.
+3. **Complexity & Efficiency:** Time and memory resource complexities remain strictly bounded, preventing performance bottlenecks in production.
+
+---
+
+### 3. Practical Implementation & Code Example
+
+Here is a practical, runnable demonstration illustrating the core principles of **${topicTitle}**:
+
+\`\`\`python
+# Pedagogical demonstration of ${topicTitle} for ${userStage}
+class ${topicTitle.replace(/[^a-zA-Z0-9]/g, '') || 'Solution'}:
+    def __init__(self, name: str = "${topicTitle}"):
+        self.name = name
+        self.is_active = True
+
+    def process(self, input_data):
+        """
+        Executes core transformation logic.
+        Time Complexity: O(n) | Space Complexity: O(1)
+        """
+        if not self.is_active:
+            raise RuntimeError("Engine not active")
+        return [f"processed_{item}" for item in input_data]
+
+# --- Driver Code ---
+if __name__ == '__main__':
+    demo = ${topicTitle.replace(/[^a-zA-Z0-9]/g, '') || 'Solution'}()
+    sample_inputs = ["input_A", "input_B", "input_C"]
+    print("Execution Result:", demo.process(sample_inputs))
+\`\`\`
+
+---
+
+### 4. Pros, Cons & Engineering Trade-offs
+
+| Advantages (+) | Engineering Constraints (-) |
+| :--- | :--- |
+| **Conceptual Clarity:** Establishes predictable, deterministic behavior across all standard use-cases. | **Upfront Design Overhead:** Requires structured architecture and validation logic. |
+| **Resource Efficiency:** Minimizes redundant computation and optimizes throughput when implemented properly. | **Edge-Case Sensitivity:** Extreme input boundaries require explicit defensive guards. |
+
+---
+
+💡 *General Knowledge Explanation • Tailored for ${userStage} • Comprehensive Academic Breakdown*`;
+
+    sendRichTutorMessage(
+      universalRichResponse,
+      Boolean(matchedRes),
+      matchedRes ? [{
         resourceId: matchedRes.id,
         resourceTitle: matchedRes.title,
         fileType: matchedRes.fileType,
         location: 'Uploaded Notes',
         snippet: `Verified study material for ${matchedRes.title}`,
         confidenceScore: 0.95
-      }] : undefined,
-      suggestedFollowUps: [
-        'Can you provide a step-by-step example?',
-        'How does this relate to exam questions?',
-        'Test my understanding with a smart quiz'
-      ]
-    };
-    setChatMessages(prev => [...prev, tutorMsg]);
-    setIsChatThinking(false);
+      }] : undefined
+    );
   };
 
   return (
